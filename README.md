@@ -3,19 +3,18 @@
 An **LLM-based compiler** to generate and execute code from plain prompts, acting as source code.
 
 ---
-
-## Features
-
-- Reads project files with the `*.llmc.json` extension (one per directory).
-- Generates an `undo.executor.txt` file for undo operations.
-- Allows cleanup operations by renaming `undo.executor.txt` to `cleanup.executor.txt`. LLMC will detect and execute the cleanup commands, then stop.
-
----
 ### Demo
 
 Fullscreen for better experience.
 
 https://github.com/user-attachments/assets/62a6fde1-b9e3-4498-a14a-2dbbc6cab3ca
+
+---
+## Features
+
+- Reads project files with the `*.llmc.json` extension (one per directory).
+- Generates an `undo.executor.txt` file for undo operations.
+- Allows cleanup operations by renaming `undo.executor.txt` to `cleanup.executor.txt`. LLMC will detect and execute the cleanup commands, then stop.
 
 ---
 
