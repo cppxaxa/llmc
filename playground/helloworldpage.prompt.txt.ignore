@@ -1,0 +1,10 @@
+Prompt:
+- IncludeDateTime
+- IncludeLs
+PostBuild:
+- RenameFile(from="goodmorning.html",to="index.html")
+- ExecuteCmd(batchCode="index.html")
+---
+Write a html file with a beautiful CSS framework that shows text "Good morning Prateek" with excellent animations and typography. Also, keep it colorful but high contrast and easy on eyes. After the wishes, write a paragraph with good typography a very motivations poem. Also, please don't use NodeJS.
+Also, please draw anything in the page maybe using svg related to the theme.
+Save the file with the name **goodmorning.html** and don't open it.

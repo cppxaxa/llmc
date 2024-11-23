@@ -1,0 +1,7 @@
+Prompt:
+- IncludeDateTime
+- IncludeLs
+PostBuild:
+- ExecuteCmd(batchCode="index.html")
+---
+Write a single html file "index.html". It should render some javascript, css, html buttons to build a functional calculator. Keep it colorful with good typography and elegant. Support basic operations e.g. +, -, *, /, pow, sqrt. Give the instructions to save the file as index.html

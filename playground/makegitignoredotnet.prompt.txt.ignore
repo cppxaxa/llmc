@@ -1,0 +1,7 @@
+Prompt:
+- IncludeDateTime
+- IncludeLs
+PostBuild:
+---
+Write a .gitignore file for a C# project. Give instructions to save the file also.
+The git ignore file must also exclude the bin and obj folders.
