@@ -11,6 +11,13 @@ An **LLM-based compiler** to generate and execute code from plain prompts, actin
 - Allows cleanup operations by renaming `undo.executor.txt` to `cleanup.executor.txt`. LLMC will detect and execute the cleanup commands, then stop.
 
 ---
+### Demo
+
+Fullscreen for better experience.
+
+<video controls src="screenshots/CreateCalculatorSmall.mp4" title="CreateCalculatorProject"></video>
+
+---
 
 ## How to Use
 
