@@ -15,7 +15,7 @@ An **LLM-based compiler** to generate and execute code from plain prompts, actin
 
 Fullscreen for better experience.
 
-<video controls src="screenshots/CreateCalculatorSmall.mp4" title="CreateCalculatorProject"></video>
+https://github.com/user-attachments/assets/62a6fde1-b9e3-4498-a14a-2dbbc6cab3ca
 
 ---
 
