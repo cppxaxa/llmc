@@ -108,7 +108,7 @@ internal class ProjectLogic(
         return string.Join(Environment.NewLine, undo);
     }
 
-    private static string InvokeExecutor(string parentPath, ExecutorFinderResult finderResult)
+    public static string InvokeExecutor(string parentPath, ExecutorFinderResult finderResult)
     {
         IExecutor? executor = Assembly.GetExecutingAssembly()
             .CreateInstance($"llmc.Executor.{finderResult.ClassName}") as IExecutor;

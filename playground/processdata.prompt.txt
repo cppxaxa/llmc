@@ -1,0 +1,23 @@
+Prompt:
+- IncludeDateTime
+- IncludeLs
+PostBuild:
+- ExecutePython(filename="program.py")
+---
+Write a plain python script "program.py" for reading the "data.csv" without external libraries.
+The csv file looks like:
+
+name
+apollo
+bag
+bag
+hello
+apollo
+
+and write processed.csv with headers with group by name to count.
+
+name,count
+apollo,2
+bag,2
+
+Provide instructions to save the program.py but don't execute the program.py

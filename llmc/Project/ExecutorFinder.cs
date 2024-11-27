@@ -44,6 +44,7 @@ namespace llmc.Project
                 $"ExecuteCmd(batchCode=\"\"){Environment.NewLine}" +
                 $"ExecutePwsh(filename=\"\"){Environment.NewLine}" +
                 $"ExecutePython(filename=\"\"){Environment.NewLine}" +
+                $"ExecutePython(pythonCode=\"\"){Environment.NewLine}" +
                 $"ExecuteSh(filename=\"\"){Environment.NewLine}" +
                 $"WriteFile(filename=\"\",escapedString=\"\"){Environment.NewLine}" +
                 $"RenameFile(from=\"\",to=\"\"){Environment.NewLine}" +

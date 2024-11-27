@@ -13,6 +13,8 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Python.Included" Version="3.11.6" />
+    <PackageReference Include="pythonnet" Version="3.0.4" />
     <PackageReference Include="YamlDotNet" Version="16.2.0" />
   </ItemGroup>
 

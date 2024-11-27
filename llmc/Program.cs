@@ -29,6 +29,8 @@ if (projectJson == null)
     projectPath = @"C:\B\L1\llmc\playground";
 }
 
+AppContext.SetSwitch("System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization", true);
+
 projectLogic = new ProjectLogic(projectPath, llmConnector, promptDecorator, promptExtractor, executorFinder);
 
 if (projectLogic.CheckForCleanup(projectPath))
