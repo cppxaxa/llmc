@@ -3,6 +3,8 @@ Prompt:
 - IncludeLs
 PostBuild:
 - ExecutePython(filename="program.py")
+AppendToCleanup:
+- DeleteFile(filename="processed.csv")
 ---
 Write a plain python script "program.py" for reading the "data.csv" without external libraries.
 The csv file looks like:

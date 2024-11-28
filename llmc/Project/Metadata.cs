@@ -2,7 +2,8 @@
 
 public class Metadata
 {
-    public List<string> Prompt { get; set; }
-    public List<string> PreBuild { get; set; }
-    public List<string> PostBuild { get; set; }
+    public List<string> Prompt { get; set; } = [];
+    public List<string> PreBuild { get; set; } = [];
+    public List<string> PostBuild { get; set; } = [];
+    public List<string> AppendToCleanup { get; set; } = [];
 }

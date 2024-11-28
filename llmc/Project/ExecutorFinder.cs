@@ -10,6 +10,9 @@ namespace llmc.Project
         {
             string prompt = GetPrompt(input);
             string result = connector.Complete(prompt);
+
+            Console.WriteLine($"ExecutorFinder result:{Environment.NewLine}{result}");
+
             return ParseResult(result);
         }
 

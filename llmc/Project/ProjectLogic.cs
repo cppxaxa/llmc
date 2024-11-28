@@ -105,6 +105,12 @@ internal class ProjectLogic(
             }
         }
 
+        // Append to cleanup.
+        foreach (var cleanup in result.Prompt.Metadata.AppendToCleanup)
+        {
+            undo.Add(cleanup);
+        }
+
         return string.Join(Environment.NewLine, undo);
     }
 
