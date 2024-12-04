@@ -53,7 +53,7 @@ internal class Rewrite100 : FeatureCommon
 
         for (int i = 0; i < metaFileContents.Count; i++)
         {
-            if (IsFileReadingRequired(metaFileContents[i]))
+            if (IsFileReadingRequired(fileNames[i], metaFileContents[i]))
             {
                 Console.WriteLine($"{nameof(Rewrite100)}:Reading file required: {fileNames[i]}");
 
@@ -78,7 +78,7 @@ internal class Rewrite100 : FeatureCommon
 
         for (int i = 0; i < fileNames.Count ; i++)
         {
-            if (IsFileRewriteRequired(metaFileContents[i]))
+            if (IsFileRewriteRequired(fileNames[i], metaFileContents[i]))
             {
                 Console.WriteLine($"{nameof(Rewrite100)}:Rewriting file required: {fileNames[i]}");
 
@@ -100,12 +100,12 @@ internal class Rewrite100 : FeatureCommon
         return compiledFinderResults;
     }
 
-    private bool IsFileRewriteRequired(string meta)
+    private bool IsFileRewriteRequired(string filename, string meta)
     {
         EnsureThat.EnsureArg.IsNotNull(Connector, nameof(Connector));
 
         string prompt = $"Return single word true or false. Based on the user ask on a file, " +
-            $"do you think that we should make changes to the file for user query?{Environment.NewLine}" +
+            $"do you think that we should make changes to the file '{filename}' for user query?{Environment.NewLine}" +
             $"Ask on the file:{meta}{Environment.NewLine}" +
             $"AI answer: ";
 
@@ -114,12 +114,12 @@ internal class Rewrite100 : FeatureCommon
         return result.Contains("true", StringComparison.OrdinalIgnoreCase);
     }
 
-    private bool IsFileReadingRequired(string meta)
+    private bool IsFileReadingRequired(string filename, string meta)
     {
         EnsureThat.EnsureArg.IsNotNull(Connector, nameof(Connector));
 
         string prompt = $"Return single word true or false. Based on the user ask on a file, " +
-            $"do you think that we should read the file for reference while doing any operation?{Environment.NewLine}" +
+            $"do you think that we should read the file '{filename}' for reference while doing any operation?{Environment.NewLine}" +
             $"Ask on the file:{meta}{Environment.NewLine}" +
             $"AI answer: ";
 
