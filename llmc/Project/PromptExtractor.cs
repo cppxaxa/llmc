@@ -47,6 +47,19 @@ internal class PromptExtractor
             }
         }
 
+        // Parse features.
+        List<ExecutorFinderResult> features = [];
+
+        if (metadata.Features != null)
+        {
+            foreach (string featureItem in metadata.Features)
+            {
+                (string className, string param) = ExecutorParser.Parse(featureItem);
+
+                features.Add(new ExecutorFinderResult(ClassName: className, Param: param));
+            }
+        }
+
         // Parse postbuild.
         List<ExecutorFinderResult> postBuild = [];
 
@@ -62,6 +75,6 @@ internal class PromptExtractor
 
         return new Prompt(
             Text: sections.LastOrDefault(string.Empty), MetadataYaml: metadataYaml,
-            PreBuild: preBuild, PostBuild: postBuild, Metadata: metadata);
+            PreBuild: preBuild, Features: features, PostBuild: postBuild, Metadata: metadata);
     }
 }

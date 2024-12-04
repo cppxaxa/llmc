@@ -42,13 +42,20 @@ if (projectLogic.CheckForCleanup(projectPath))
 
 var prompts = projectLogic.ReadPrompts();
 var llmResults = projectLogic.GetLlmResults(prompts);
-string undoCommands = projectLogic.Process(llmResults);
+var processFeatures = projectLogic.ProcessFeatures(
+    llmResults.Select(e => e.Prompt).ToList());
+string undoContent = string.Empty;
 
-string undoContent = undoCommands;
+if (!processFeatures.AnyFeatureProcessed)
+{
+    undoContent = projectLogic.Process(llmResults);
+}
 
 if (File.Exists(Path.Join(projectPath, "undo.executor.txt")))
 {
-    undoContent = File.ReadAllText(Path.Join(projectPath, "undo.executor.txt")) + Environment.NewLine + undoCommands;
+    undoContent = File.ReadAllText(
+        Path.Join(projectPath, "undo.executor.txt")) +
+        Environment.NewLine + undoContent;
 }
 
 File.WriteAllText(Path.Join(projectPath, "undo.executor.txt"), undoContent);

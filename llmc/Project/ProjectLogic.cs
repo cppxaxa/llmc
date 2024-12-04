@@ -1,5 +1,6 @@
 ﻿using llmc.Connector;
 using llmc.Executor;
+using llmc.Features;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -114,7 +115,7 @@ internal class ProjectLogic(
         return string.Join(Environment.NewLine, undo);
     }
 
-    public static string InvokeExecutor(string parentPath, ExecutorFinderResult finderResult)
+    public string InvokeExecutor(string parentPath, ExecutorFinderResult finderResult)
     {
         IExecutor? executor = Assembly.GetExecutingAssembly()
             .CreateInstance($"llmc.Executor.{finderResult.ClassName}") as IExecutor;
@@ -125,11 +126,48 @@ internal class ProjectLogic(
         }
         else
         {
+            // Inject dependencies.
+            executor.Connector = connector;
+
             Console.WriteLine($"Executing {finderResult.ClassName} with param {finderResult.Param}");
             return executor.Execute(parentPath, finderResult.Param);
         }
 
         return string.Empty;
+    }
+
+    public bool InvokeFeature(
+        string parentPath, Prompt prompt, ExecutorFinderResult finderResult)
+    {
+        IFeature? feature = Assembly.GetExecutingAssembly()
+            .CreateInstance($"llmc.Features.{finderResult.ClassName}") as IFeature;
+
+        if (feature == null)
+        {
+            Console.WriteLine($"Feature {finderResult.ClassName} not found");
+            return false;
+        }
+        else
+        {
+            // Inject dependencies.
+            feature.Connector = connector;
+            feature.Prompt = prompt;
+            feature.ExecutorFinder = executorFinder;
+
+            Console.WriteLine($"Executing {finderResult.ClassName} with param {finderResult.Param}");
+            var finderResultChildrens = feature.Execute(parentPath, finderResult.Param);
+
+            // Invoke executors.
+            foreach (var finderResultChildren in finderResultChildrens)
+            {
+                foreach (var finderResultChild in finderResultChildren)
+                {
+                    InvokeExecutor(parentPath, finderResultChild);
+                }
+            }
+
+            return true;
+        }
     }
 
     internal object? ReadProjectJson()
@@ -172,5 +210,24 @@ internal class ProjectLogic(
     internal bool CheckForCleanup(string projectPath)
     {
         return File.Exists(Path.Join(projectPath, "cleanup.executor.txt"));
+    }
+
+    internal FeatureResult ProcessFeatures(List<Prompt> prompts)
+    {
+        bool anyFeatureExecuted = false;
+
+        // Support features.
+        foreach (var prompt in prompts)
+        {
+            if (prompt.Features != null)
+            {
+                foreach (var feature in prompt.Features)
+                {
+                    anyFeatureExecuted |= InvokeFeature(parentPath, prompt, feature);
+                }
+            }
+        }
+
+        return new FeatureResult(AnyFeatureProcessed: anyFeatureExecuted);
     }
 }

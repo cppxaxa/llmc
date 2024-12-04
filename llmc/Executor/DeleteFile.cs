@@ -1,4 +1,5 @@
-﻿using llmc.Project;
+﻿using llmc.Connector;
+using llmc.Project;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -8,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace llmc.Executor
 {
-    internal class DeleteFile : IExecutor
+    internal class DeleteFile : ExecutorCommon
     {
-        public string Execute(string parentDirectory, string param)
+        public override string Execute(string parentDirectory, string param)
         {
             StringBuilder undo = new();
 

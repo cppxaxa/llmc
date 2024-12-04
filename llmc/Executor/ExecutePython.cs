@@ -1,4 +1,5 @@
-﻿using llmc.Project;
+﻿using llmc.Connector;
+using llmc.Project;
 using Python.Included;
 using Python.Runtime;
 using System;
@@ -9,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace llmc.Executor
 {
-    internal class ExecutePython : IExecutor
+    internal class ExecutePython : ExecutorCommon
     {
-        public string Execute(string parentDirectory, string param)
+        public override string Execute(string parentDirectory, string param)
         {
             Dictionary<string, string> p = Common.ParseParam(param);
 

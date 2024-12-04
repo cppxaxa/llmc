@@ -6,4 +6,5 @@ public class Metadata
     public List<string> PreBuild { get; set; } = [];
     public List<string> PostBuild { get; set; } = [];
     public List<string> AppendToCleanup { get; set; } = [];
+    public List<string> Features { get; set; } = [];
 }

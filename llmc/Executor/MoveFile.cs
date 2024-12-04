@@ -1,4 +1,5 @@
-﻿using llmc.Project;
+﻿using llmc.Connector;
+using llmc.Project;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace llmc.Executor
 {
-    internal class MoveFile : IExecutor
+    internal class MoveFile : ExecutorCommon
     {
-        public string Execute(string parentDirectory, string param)
+        public override string Execute(string parentDirectory, string param)
         {
             List<string> undo = [];
 
