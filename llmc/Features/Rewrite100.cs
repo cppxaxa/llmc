@@ -41,6 +41,8 @@ internal class Rewrite100 : FeatureCommon
 
         for (int i = 0; i < fileNames.Count; i++)
         {
+            Console.WriteLine($"{nameof(Rewrite100)}:Reading meta: {fileNames[i]}::{metaFileContents[i]}");
+
             header.AppendLine($"Filename: {fileNames[i]}{Environment.NewLine}");
             header.AppendLine($"Modification request:{Environment.NewLine}{metaFileContents[i]}{Environment.NewLine}");
             header.AppendLine($"----{Environment.NewLine}");
@@ -53,6 +55,8 @@ internal class Rewrite100 : FeatureCommon
         {
             if (IsFileReadingRequired(metaFileContents[i]))
             {
+                Console.WriteLine($"{nameof(Rewrite100)}:Reading file required: {fileNames[i]}");
+
                 string content = File.ReadAllText(Path.Join(parentDirectory, fileNames[i]));
 
                 contentPrompt.AppendLine($"Filename: {fileNames[i]}{Environment.NewLine}");
@@ -76,6 +80,8 @@ internal class Rewrite100 : FeatureCommon
         {
             if (IsFileRewriteRequired(metaFileContents[i]))
             {
+                Console.WriteLine($"{nameof(Rewrite100)}:Rewriting file required: {fileNames[i]}");
+
                 string prompt = $"{fileModificationPrompt}{Environment.NewLine}" +
                     $"Give the new content for file {fileNames[i]}:{Environment.NewLine}";
                 string newContent = Connector.Complete(prompt);

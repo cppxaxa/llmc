@@ -1,5 +1,5 @@
 Features:
-- Rewrite100(repo="samplerepo_changes",wildcard="*.md")
+- Rewrite100(repo="samplerepo_changes",wildcard="*.*")
 Prompt:
 - IncludeDateTime
 - IncludeLs
@@ -9,4 +9,5 @@ PreBuild:
 ---
 Give instructions to write complete README.md with minimal changes.
 I want you to revise the README.md to fix the TODO as well as add a section of "Steps to execute".
-You don't have to touch any other files :).
+Also read any *.py file to better form contents of README.md
+But write to only one file = README.md
