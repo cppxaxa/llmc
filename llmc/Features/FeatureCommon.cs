@@ -13,7 +13,8 @@ internal abstract class FeatureCommon : IFeature
     public LlmConnector? Connector { get; set; }
     public Prompt? Prompt { get; set; }
     public ExecutorFinder? ExecutorFinder { get; set; }
+    public ExecutorInvoker? ExecutorInvoker { get; set; }
 
-    abstract public List<List<ExecutorFinderResult>> Execute(
+    abstract public void Execute(
         string parentDirectory, string param);
 }

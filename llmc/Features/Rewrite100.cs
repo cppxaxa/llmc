@@ -10,14 +10,14 @@ namespace llmc.Features;
 
 internal class Rewrite100 : FeatureCommon
 {
-    public override List<List<ExecutorFinderResult>> Execute(
-        string parentDirectory, string param)
+    public override void Execute(string parentDirectory, string param)
     {
         Console.WriteLine("Executing feature: " + param);
 
         EnsureThat.EnsureArg.IsNotNull(Connector, nameof(Connector));
         EnsureThat.EnsureArg.IsNotNull(Prompt, nameof(Prompt));
         EnsureThat.EnsureArg.IsNotNull(ExecutorFinder, nameof(ExecutorFinder));
+        EnsureThat.EnsureArg.IsNotNull(ExecutorInvoker, nameof(ExecutorInvoker));
 
         Dictionary<string, string> p = Common.ParseParam(param);
         string repo = p["repo"];
@@ -97,7 +97,14 @@ internal class Rewrite100 : FeatureCommon
             }
         }
 
-        return compiledFinderResults;
+        // Execute.
+        foreach (var finderResults in compiledFinderResults)
+        {
+            foreach (var result in finderResults)
+            {
+                ExecutorInvoker.Invoke(parentDirectory, result);
+            }
+        }
     }
 
     private bool IsFileRewriteRequired(string filename, string meta)
@@ -135,9 +142,9 @@ internal class Rewrite100 : FeatureCommon
 
         string prompt = $"# Based on the user prompt, " +
             $"Check if the file content is relevant or not. If relevant, " +
-            $"Extract out any content that may be useful to answer user prompt/ " +
-            $"of tell if you suspect modifications required in the file for " +
-            $"our user prompt from it's content." +
+            $"Tell me any anything from file content that may be useful to answer user prompt/ " +
+            $"or tell if you suspect modifications required in the file for " +
+            $"serving our user prompt." +
             $"You must answer as concisely as possible, " +
             $"but completely understandable.{Environment.NewLine}" +
             $"# Given,{Environment.NewLine}" +

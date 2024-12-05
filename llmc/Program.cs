@@ -19,8 +19,9 @@ var llmConnector = new LlmConnector(llmConfiguration);
 var promptDecorator = new PromptDecorator();
 var promptExtractor = new PromptExtractor();
 var executorFinder = new ExecutorFinder(llmConnector);
+var executorInvoker = new ExecutorInvoker(llmConnector);
 string projectPath = Directory.GetCurrentDirectory();
-var projectLogic = new ProjectLogic(projectPath, llmConnector, promptDecorator, promptExtractor, executorFinder);
+var projectLogic = new ProjectLogic(projectPath, llmConnector, promptDecorator, promptExtractor, executorFinder, executorInvoker);
 
 var projectJson = projectLogic.ReadProjectJson();
 
@@ -31,7 +32,7 @@ if (projectJson == null)
 
 AppContext.SetSwitch("System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization", true);
 
-projectLogic = new ProjectLogic(projectPath, llmConnector, promptDecorator, promptExtractor, executorFinder);
+projectLogic = new ProjectLogic(projectPath, llmConnector, promptDecorator, promptExtractor, executorFinder, executorInvoker);
 
 if (projectLogic.CheckForCleanup(projectPath))
 {

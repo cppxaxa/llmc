@@ -15,7 +15,8 @@ internal class ProjectLogic(
     LlmConnector connector,
     PromptDecorator promptDecorator,
     PromptExtractor promptExtractor,
-    ExecutorFinder executorFinder)
+    ExecutorFinder executorFinder,
+    ExecutorInvoker executorInvoker)
 {
     public List<string> ReadPrompts()
     {
@@ -77,7 +78,7 @@ internal class ProjectLogic(
         {
             foreach (var preBuild in prompt.PreBuild)
             {
-                undo.Insert(0, InvokeExecutor(parentPath, preBuild));
+                undo.Insert(0, executorInvoker.Invoke(parentPath, preBuild));
             }
         }
 
@@ -94,7 +95,7 @@ internal class ProjectLogic(
 
         foreach (var finderResult in finderResults)
         {
-            undo.Insert(0, InvokeExecutor(parentPath, finderResult));
+            undo.Insert(0, executorInvoker.Invoke(parentPath, finderResult));
         }
 
         // Post build.
@@ -102,7 +103,7 @@ internal class ProjectLogic(
         {
             foreach (var postBuild in result.Prompt.PostBuild)
             {
-                undo.Insert(0, InvokeExecutor(parentPath, postBuild));
+                undo.Insert(0, executorInvoker.Invoke(parentPath, postBuild));
             }
         }
 
@@ -113,27 +114,6 @@ internal class ProjectLogic(
         }
 
         return string.Join(Environment.NewLine, undo);
-    }
-
-    public string InvokeExecutor(string parentPath, ExecutorFinderResult finderResult)
-    {
-        IExecutor? executor = Assembly.GetExecutingAssembly()
-            .CreateInstance($"llmc.Executor.{finderResult.ClassName}") as IExecutor;
-
-        if (executor == null)
-        {
-            Console.WriteLine($"Executor {finderResult.ClassName} not found");
-        }
-        else
-        {
-            // Inject dependencies.
-            executor.Connector = connector;
-
-            Console.WriteLine($"Executing {finderResult.ClassName} with param {finderResult.Param}");
-            return executor.Execute(parentPath, finderResult.Param);
-        }
-
-        return string.Empty;
     }
 
     public bool InvokeFeature(
@@ -153,18 +133,10 @@ internal class ProjectLogic(
             feature.Connector = connector;
             feature.Prompt = prompt;
             feature.ExecutorFinder = executorFinder;
+            feature.ExecutorInvoker = executorInvoker;
 
             Console.WriteLine($"Executing {finderResult.ClassName} with param {finderResult.Param}");
-            var finderResultChildrens = feature.Execute(parentPath, finderResult.Param);
-
-            // Invoke executors.
-            foreach (var finderResultChildren in finderResultChildrens)
-            {
-                foreach (var finderResultChild in finderResultChildren)
-                {
-                    InvokeExecutor(parentPath, finderResultChild);
-                }
-            }
+            feature.Execute(parentPath, finderResult.Param);
 
             return true;
         }
@@ -201,7 +173,8 @@ internal class ProjectLogic(
             string className = parts[0];
             string param = parts[1].Trim(')');
 
-            InvokeExecutor(parentPath, new ExecutorFinderResult(ClassName: className, Param: param));
+            executorInvoker.Invoke(
+                parentPath, new ExecutorFinderResult(ClassName: className, Param: param));
         }
 
         File.Delete(Path.Join(projectPath, "cleanup.executor.txt"));

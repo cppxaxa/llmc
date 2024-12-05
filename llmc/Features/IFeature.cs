@@ -16,7 +16,8 @@ internal interface IFeature
 
     ExecutorFinder? ExecutorFinder { get; set; }
 
+    ExecutorInvoker? ExecutorInvoker { get; set; }
+
     // Returns command to undo.
-    List<List<ExecutorFinderResult>> Execute(
-        string parentDirectory, string param);
+    void Execute(string parentDirectory, string param);
 }
