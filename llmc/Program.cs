@@ -41,6 +41,16 @@ if (projectLogic.CheckForCleanup(projectPath))
     return;
 }
 
+//executorInvoker.Invoke(
+//    projectPath,
+//    new ExecutorFinderResult(ClassName: "RedactFile", Param: "filename=\"bigprog.py\",lines=\"22-25;30-37\""));
+
+//executorInvoker.Invoke(
+//    projectPath,
+//    new ExecutorFinderResult(ClassName: "UndoRedactedFile", Param: "filename=\"bigprog.py\""));
+
+//return;
+
 var prompts = projectLogic.ReadPrompts();
 var llmResults = projectLogic.GetLlmResults(prompts);
 var processFeatures = projectLogic.ProcessFeatures(

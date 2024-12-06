@@ -10,10 +10,8 @@ internal class ExecutorInvoker(
 {
     internal string Invoke(string parentPath, ExecutorFinderResult finderResult)
     {
-        IExecutor? executor = Assembly.GetExecutingAssembly()
-            .CreateInstance($"llmc.Executor.{finderResult.ClassName}") as IExecutor;
-
-        if (executor == null)
+        if (Assembly.GetExecutingAssembly()
+            .CreateInstance($"llmc.Executor.{finderResult.ClassName}") is not IExecutor executor)
         {
             Console.WriteLine($"Executor {finderResult.ClassName} not found");
         }
