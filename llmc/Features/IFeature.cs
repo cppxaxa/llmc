@@ -17,6 +17,8 @@ internal interface IFeature
     ExecutorFinder? ExecutorFinder { get; set; }
 
     ExecutorInvoker? ExecutorInvoker { get; set; }
+    
+    FileRedactor? FileRedactor { get; set; }
 
     // Returns command to undo.
     void Execute(string parentDirectory, string param);

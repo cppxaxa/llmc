@@ -14,6 +14,7 @@ internal abstract class FeatureCommon : IFeature
     public Prompt? Prompt { get; set; }
     public ExecutorFinder? ExecutorFinder { get; set; }
     public ExecutorInvoker? ExecutorInvoker { get; set; }
+    public FileRedactor? FileRedactor { get; set; }
 
     abstract public void Execute(
         string parentDirectory, string param);

@@ -16,7 +16,8 @@ internal class ProjectLogic(
     PromptDecorator promptDecorator,
     PromptExtractor promptExtractor,
     ExecutorFinder executorFinder,
-    ExecutorInvoker executorInvoker)
+    ExecutorInvoker executorInvoker,
+    FileRedactor fileRedactor)
 {
     public List<string> ReadPrompts()
     {
@@ -134,6 +135,7 @@ internal class ProjectLogic(
             feature.Prompt = prompt;
             feature.ExecutorFinder = executorFinder;
             feature.ExecutorInvoker = executorInvoker;
+            feature.FileRedactor = fileRedactor;
 
             Console.WriteLine($"Executing {finderResult.ClassName} with param {finderResult.Param}");
             feature.Execute(parentPath, finderResult.Param);

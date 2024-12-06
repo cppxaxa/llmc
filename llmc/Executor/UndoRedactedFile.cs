@@ -22,8 +22,11 @@ internal class UndoRedactedFile : ExecutorCommon
 
         if (File.Exists(Path.Join(parentDirectory, filename)))
         {
+            string directory = Path.GetDirectoryName(Path.Join(parentDirectory, filename))!;
+            string finalFilename = Path.GetFileName(filename);
+
             // List all the redacted files.
-            string[] redactedFiles = Directory.GetFiles(parentDirectory, $"{filename}.redacted-*");
+            string[] redactedFiles = Directory.GetFiles(directory, $"{finalFilename}.redacted-*");
 
             Console.WriteLine($"UndoRedactedFile:Found {redactedFiles.Length} redacted files.");
 

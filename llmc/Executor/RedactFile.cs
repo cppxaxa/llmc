@@ -17,16 +17,13 @@ internal class RedactFile : ExecutorCommon
 
         Dictionary<string, string> p = Common.ParseParam(param);
         string filename = p["filename"];
-        string[] lines = p["lines"].Split(';');
+        List<string> lines = JsonConvert.DeserializeObject<List<string>>(p["lines"])!;
 
-        Console.WriteLine($"RedactFile:Redaction started on file {filename} into {lines.Length} parts.");
+        Console.WriteLine($"RedactFile:Redaction started on file {filename} in " +
+            $"{lines.Count} parts.");
 
         if (File.Exists(Path.Join(parentDirectory, filename)))
         {
-            // Backup if required.
-            //string newFilename = filename + ".bak-" + Guid.NewGuid();
-            //File.Copy(Path.Join(parentDirectory, filename), Path.Join(parentDirectory, newFilename));
-
             string[] fileLines = File.ReadAllLines(Path.Join(parentDirectory, filename));
 
             int c = 1;
@@ -76,7 +73,7 @@ internal class RedactFile : ExecutorCommon
 
             File.WriteAllText(
                 Path.Join(parentDirectory, filename),
-                string.Join(Environment.NewLine, fileLines[0..idx]));
+                string.Join(Environment.NewLine, fileLines[0..(idx+1)]));
 
             undo.AppendLine($"UndoRedactedFile(filename=\"{filename}\")");
         }

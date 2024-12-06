@@ -1,6 +1,7 @@
 ﻿
 using llmc.Connector;
 using llmc.Project;
+using Newtonsoft.Json;
 
 if (args.Length == 1 && (args[0] == "--help" || args[0] == "-h" || args[0] == "/?"))
 {
@@ -20,8 +21,9 @@ var promptDecorator = new PromptDecorator();
 var promptExtractor = new PromptExtractor();
 var executorFinder = new ExecutorFinder(llmConnector);
 var executorInvoker = new ExecutorInvoker(llmConnector);
+var fileRedactor = new FileRedactor(llmConnector, executorInvoker);
 string projectPath = Directory.GetCurrentDirectory();
-var projectLogic = new ProjectLogic(projectPath, llmConnector, promptDecorator, promptExtractor, executorFinder, executorInvoker);
+var projectLogic = new ProjectLogic(projectPath, llmConnector, promptDecorator, promptExtractor, executorFinder, executorInvoker, fileRedactor);
 
 var projectJson = projectLogic.ReadProjectJson();
 
@@ -32,7 +34,7 @@ if (projectJson == null)
 
 AppContext.SetSwitch("System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization", true);
 
-projectLogic = new ProjectLogic(projectPath, llmConnector, promptDecorator, promptExtractor, executorFinder, executorInvoker);
+projectLogic = new ProjectLogic(projectPath, llmConnector, promptDecorator, promptExtractor, executorFinder, executorInvoker, fileRedactor);
 
 if (projectLogic.CheckForCleanup(projectPath))
 {
@@ -41,9 +43,30 @@ if (projectLogic.CheckForCleanup(projectPath))
     return;
 }
 
+
+
+//fileRedactor.RedactFile(
+//    projectPath,
+//    "bigprog.py",
+//    new Prompt(
+//        Text: "Give instructions to write complete README.md with minimal changes.\r\n" +
+//        "I want you to revise the README.md to fix the TODO as well as add a section of \"Steps to execute\".\r\n" +
+//        "Also read any *.py file to better form contents of README.md about the features calculate, labels of buttons.\r\n" +
+//        "But write to only one file = README.md",
+//        MetadataYaml: "",
+//        PreBuild: [],
+//        Features: [],
+//        PostBuild: [],
+//        Metadata: new()));
+
+//fileRedactor.Undo(projectPath, "bigprog.py");
+
+//string lines = "[\"20-72\"]";
 //executorInvoker.Invoke(
 //    projectPath,
-//    new ExecutorFinderResult(ClassName: "RedactFile", Param: "filename=\"bigprog.py\",lines=\"22-25;30-37\""));
+//    new ExecutorFinderResult(
+//        ClassName: "RedactFile",
+//        Param: $"filename=\"bigprog.py\",lines={JsonConvert.SerializeObject(lines)}"));
 
 //executorInvoker.Invoke(
 //    projectPath,
