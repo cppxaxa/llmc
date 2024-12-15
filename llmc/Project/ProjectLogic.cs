@@ -49,7 +49,13 @@ internal class ProjectLogic(
             Prompt prompt = promptExtractor.Extract(rawPrompt);
             string promptString = promptDecorator.Decorate(prompt.Text);
             PreProcess(prompt, promptString);
-            string result = connector.Complete(promptString);
+            
+            string result = string.Empty;
+            if (!string.IsNullOrWhiteSpace(promptString))
+            {
+                result = connector.Complete(promptString);
+            }
+
             results.Add(new LlmResult(Prompt: prompt, Text: result));
         }
 

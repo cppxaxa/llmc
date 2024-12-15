@@ -1,0 +1,10 @@
+PostBuild:
+- ExecuteCmd(batchCode="index.html")
+- Comment(Give some time to browser)
+- TaskDelay(millis="1000")
+- Comment(Send mouse pointer to a safe location)
+- MouseMove(x="10",y="200")
+- KeyboardPressRelease(key="VcF11")
+- Comment(Let's wait for the fullscreen notification to go away)
+- TaskDelay(millis="5000")
+---

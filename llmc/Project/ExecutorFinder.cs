@@ -9,7 +9,16 @@ namespace llmc.Project
         internal List<ExecutorFinderResult> Find(string input)
         {
             string prompt = GetPrompt(input);
-            string result = connector.Complete(prompt);
+            string result = string.Empty;
+
+            if (!string.IsNullOrWhiteSpace(input))
+            {
+                result = connector.Complete(prompt);
+            }
+            else
+            {
+                Console.WriteLine($"ExecutorFinder found empty input.");
+            }
 
             Console.WriteLine($"ExecutorFinder result:{Environment.NewLine}{result}");
 

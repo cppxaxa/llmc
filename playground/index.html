@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elegant Calculator</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .calculator {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .display {
+            background-color: #eee;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #4CAF50; /* Green */
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #3e8e41;
+        }
+
+        .operator {
+            background-color: #f44336; /* Red */
+        }
+
+        .operator:hover {
+            background-color: #d32f2f;
+        }
+
+        .unary {
+            background-color: #ff9800; /* Orange */
+        }
+
+        .unary:hover {
+            background-color: #e68a00;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>Simple Calculator</h1>
+        <div class="display" id="display">0</div>
+        <button onclick="appendNumber('7')">7</button>
+        <button onclick="appendNumber('8')">8</button>
+        <button onclick="appendNumber('9')">9</button>
+        <button onclick="appendOperator('/')" class="operator">/</button><br>
+        <button onclick="appendNumber('4')">4</button>
+        <button onclick="appendNumber('5')">5</button>
+        <button onclick="appendNumber('6')">6</button>
+        <button onclick="appendOperator('*')" class="operator">*</button><br>
+        <button onclick="appendNumber('1')">1</button>
+        <button onclick="appendNumber('2')">2</button>
+        <button onclick="appendNumber('3')">3</button>
+        <button onclick="appendOperator('-')" class="operator">-</button><br>
+        <button onclick="appendNumber('0')">0</button>
+        <button onclick="appendNumber('.')">.</button>
+        <button onclick="calculate()" class="operator">=</button>
+        <button onclick="appendOperator('+')" class="operator">+</button><br>
+        <button onclick="unaryOperation('sqrt')" class="unary">√</button>
+        <button onclick="unaryOperation('pow')" class="unary">x²</button>
+        <button onclick="clearDisplay()">C</button>
+
+    </div>
+
+    <script>
+        let display = document.getElementById('display');
+        let currentInput = '';
+
+        function appendNumber(num) {
+            currentInput += num;
+            display.textContent = currentInput;
+        }
+
+        function appendOperator(op) {
+            currentInput += op;
+            display.textContent = currentInput;
+        }
+
+
+        function calculate() {
+            try {
+                currentInput = eval(currentInput);
+                display.textContent = currentInput;
+            } catch (error) {
+                display.textContent = "Error";
+            }
+        }
+
+        function clearDisplay() {
+            currentInput = '';
+            display.textContent = '0';
+        }
+
+        function unaryOperation(op) {
+            let num = parseFloat(currentInput);
+            if (isNaN(num)) return; //Handle non-numeric input
+
+            if (op === 'sqrt') {
+                currentInput = Math.sqrt(num);
+            } else if (op === 'pow') {
+                currentInput = Math.pow(num, 2);
+            }
+            display.textContent = currentInput;
+        }
+    </script>
+</body>
+</html>
