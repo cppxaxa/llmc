@@ -1,6 +1,6 @@
 ﻿namespace llmc.Connector;
 
-public record Result(
+public record CompletionResult(
     List<Candidate> Candidates,
     UsageMetadata UsageMetadata,
     string ModelVersion

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 
 namespace llmc.Connector;
 
@@ -12,6 +8,12 @@ internal class LlmConnector(Configuration configuration)
     {
         var client = GetClient();
         return client.Complete(prompt);
+    }
+
+    public float[]? GetEmbedding(string text)
+    {
+        var client = GetClient();
+        return client.GetEmbedding(text);
     }
 
     private Client GetClient()
