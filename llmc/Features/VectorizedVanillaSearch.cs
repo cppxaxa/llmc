@@ -13,6 +13,8 @@ internal class VectorizedVanillaSearch : FeatureCommon
     {
         Console.WriteLine("Executing feature VectorizedVanillaSearch: " + param);
 
+        StringBuilder undo = new();
+
         EnsureThat.EnsureArg.IsNotNull(Connector, nameof(Connector));
         EnsureThat.EnsureArg.IsNotNull(Prompt, nameof(Prompt));
         EnsureThat.EnsureArg.IsNotNull(ExecutorInvoker, nameof(ExecutorInvoker));
@@ -26,6 +28,7 @@ internal class VectorizedVanillaSearch : FeatureCommon
         string outFilePath = Path.Combine(parentDirectory, file);
 
         string promptText = Prompt.Text;
+        string res;
 
         // Clean the prompt text to avoid further consumption.
         Prompt.Text = string.Empty;
@@ -45,7 +48,7 @@ internal class VectorizedVanillaSearch : FeatureCommon
         // Search.
         float[] vector = Connector.GetEmbedding(promptText)
             ?? throw new Exception("Error in getting embedding for search");
-        var result = SearchVector(vector, 5);
+        var result = SearchVector(vector, page);
 
         StringBuilder searchResult = new();
 
@@ -58,15 +61,19 @@ internal class VectorizedVanillaSearch : FeatureCommon
         {
             string newFile = $"{file}.{Guid.NewGuid()}.bak";
 
-            ExecutorInvoker.Invoke(parentDirectory, new ExecutorFinderResult(
+            res = ExecutorInvoker.Invoke(parentDirectory, new ExecutorFinderResult(
                 "MoveFile", $"from=\"{file}\",to=\"{newFile}\""));
+
+            undo.AppendLine(res);
         }
 
         // Save the search result.
         File.WriteAllText(outFilePath, searchResult.ToString());
 
-        ExecutorInvoker.Invoke(parentDirectory, new ExecutorFinderResult(
+        res = ExecutorInvoker.Invoke(parentDirectory, new ExecutorFinderResult(
             "AppendUndo", $"fn=\"DeleteFile\",filename=\"{file}\""));
+
+        undo.AppendLine(res);
     }
 
     // Collection to store vectors and their associated strings
