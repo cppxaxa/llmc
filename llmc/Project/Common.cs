@@ -33,8 +33,9 @@ namespace llmc.Project
         {
             string somewhatJson = param.Replace("=\"", ":\"");
             string json = $"{{{somewhatJson}}}";
-            Dictionary<string, string> p = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
-            return p;
+            Dictionary<string, string> p = JsonConvert.DeserializeObject<Dictionary<string, string>>(json)
+                ?? throw new ArgumentException("Malformed parameter format.");
+            return p ?? new Dictionary<string, string>();
         }
     }
 }

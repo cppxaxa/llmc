@@ -1,7 +1,6 @@
 ﻿
 using llmc.Connector;
 using llmc.Project;
-using Newtonsoft.Json;
 
 if (args.Length == 1 && (args[0] == "--help" || args[0] == "-h" || args[0] == "/?"))
 {
@@ -42,37 +41,6 @@ if (projectLogic.CheckForCleanup(projectPath))
     projectLogic.Cleanup(projectPath);
     return;
 }
-
-
-
-//fileRedactor.RedactFile(
-//    projectPath,
-//    "bigprog.py",
-//    new Prompt(
-//        Text: "Give instructions to write complete README.md with minimal changes.\r\n" +
-//        "I want you to revise the README.md to fix the TODO as well as add a section of \"Steps to execute\".\r\n" +
-//        "Also read any *.py file to better form contents of README.md about the features calculate, labels of buttons.\r\n" +
-//        "But write to only one file = README.md",
-//        MetadataYaml: "",
-//        PreBuild: [],
-//        Features: [],
-//        PostBuild: [],
-//        Metadata: new()));
-
-//fileRedactor.Undo(projectPath, "bigprog.py");
-
-//string lines = "[\"20-72\"]";
-//executorInvoker.Invoke(
-//    projectPath,
-//    new ExecutorFinderResult(
-//        ClassName: "RedactFile",
-//        Param: $"filename=\"bigprog.py\",lines={JsonConvert.SerializeObject(lines)}"));
-
-//executorInvoker.Invoke(
-//    projectPath,
-//    new ExecutorFinderResult(ClassName: "UndoRedactedFile", Param: "filename=\"bigprog.py\""));
-
-//return;
 
 var prompts = projectLogic.ReadPrompts();
 var llmResults = projectLogic.GetLlmResults(prompts);

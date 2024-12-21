@@ -12,7 +12,7 @@ internal class Rewrite100 : FeatureCommon
 {
     public override void Execute(string parentDirectory, string param)
     {
-        Console.WriteLine("Executing feature: " + param);
+        Console.WriteLine("Executing feature Rewrite100: " + param);
 
         EnsureThat.EnsureArg.IsNotNull(Connector, nameof(Connector));
         EnsureThat.EnsureArg.IsNotNull(Prompt, nameof(Prompt));
