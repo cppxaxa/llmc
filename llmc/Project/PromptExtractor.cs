@@ -74,7 +74,7 @@ internal class PromptExtractor
         }
 
         return new Prompt(
-            Text: sections.LastOrDefault(string.Empty), MetadataYaml: metadataYaml,
-            PreBuild: preBuild, Features: features, PostBuild: postBuild, Metadata: metadata);
+            text: sections.LastOrDefault(string.Empty), metadataYaml: metadataYaml,
+            preBuild: preBuild, features: features, postBuild: postBuild, metadata: metadata);
     }
 }

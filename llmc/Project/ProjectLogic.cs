@@ -19,7 +19,7 @@ internal class ProjectLogic(
     ExecutorInvoker executorInvoker,
     FileRedactor fileRedactor)
 {
-    public List<string> ReadPrompts()
+    public List<Prompt> ReadPrompts()
     {
         List<string> prompts = [];
 
@@ -37,16 +37,15 @@ internal class ProjectLogic(
             Console.WriteLine("No prompts found in the project directory");
         }
 
-        return prompts;
+        return prompts.Select(promptExtractor.Extract).ToList();
     }
 
-    public List<LlmResult> GetLlmResults(List<string> prompts)
+    public List<LlmResult> GetLlmResults(List<Prompt> prompts)
     {
         List<LlmResult> results = [];
 
-        foreach (var rawPrompt in prompts)
+        foreach (var prompt in prompts)
         {
-            Prompt prompt = promptExtractor.Extract(rawPrompt);
             string promptString = promptDecorator.Decorate(prompt.Text);
             PreProcess(prompt, promptString);
             
@@ -123,8 +122,7 @@ internal class ProjectLogic(
         return string.Join(Environment.NewLine, undo);
     }
 
-    public bool InvokeFeature(
-        string parentPath, Prompt prompt, ExecutorFinderResult finderResult)
+    public IFeature? CreateFeature(Prompt prompt, ExecutorFinderResult finderResult)
     {
         IFeature? feature = Assembly.GetExecutingAssembly()
             .CreateInstance($"llmc.Features.{finderResult.ClassName}") as IFeature;
@@ -132,7 +130,7 @@ internal class ProjectLogic(
         if (feature == null)
         {
             Console.WriteLine($"Feature {finderResult.ClassName} not found");
-            return false;
+            return null;
         }
         else
         {
@@ -143,11 +141,18 @@ internal class ProjectLogic(
             feature.ExecutorInvoker = executorInvoker;
             feature.FileRedactor = fileRedactor;
 
-            Console.WriteLine($"Executing {finderResult.ClassName} with param {finderResult.Param}");
-            feature.Execute(parentPath, finderResult.Param);
-
-            return true;
+            return feature;
         }
+    }
+
+    public bool InvokeFeature(
+        string parentPath, IFeature feature,
+        ExecutorFinderResult finderResult)
+    {
+        Console.WriteLine($"Executing {finderResult.ClassName} with param {finderResult.Param}");
+        feature.Execute(parentPath, finderResult.Param);
+
+        return true;
     }
 
     internal object? ReadProjectJson()
@@ -193,7 +198,7 @@ internal class ProjectLogic(
         return File.Exists(Path.Join(projectPath, "cleanup.executor.txt"));
     }
 
-    internal FeatureResult ProcessFeatures(List<Prompt> prompts)
+    internal FeatureResult ProcessPrebuildFeatures(List<Prompt> prompts)
     {
         bool anyFeatureExecuted = false;
 
@@ -202,9 +207,50 @@ internal class ProjectLogic(
         {
             if (prompt.Features != null)
             {
-                foreach (var feature in prompt.Features)
+                foreach (var finderResult in prompt.Features)
                 {
-                    anyFeatureExecuted |= InvokeFeature(parentPath, prompt, feature);
+                    IFeature? feature = CreateFeature(prompt, finderResult);
+
+                    if (feature != null)
+                    {
+                        // Skip if not prebuild.
+                        if (!feature.AsPrebuild)
+                        {
+                            continue;
+                        }
+                        
+                        anyFeatureExecuted |= InvokeFeature(parentPath, feature, finderResult);
+                    }
+                }
+            }
+        }
+
+        return new FeatureResult(AnyFeatureProcessed: anyFeatureExecuted);
+    }
+
+    internal FeatureResult ProcessNonPrebuildFeatures(List<Prompt> prompts)
+    {
+        bool anyFeatureExecuted = false;
+
+        // Support features.
+        foreach (var prompt in prompts)
+        {
+            if (prompt.Features != null)
+            {
+                foreach (var finderResult in prompt.Features)
+                {
+                    IFeature? feature = CreateFeature(prompt, finderResult);
+
+                    if (feature != null)
+                    {
+                        // Skip if prebuild.
+                        if (feature.AsPrebuild)
+                        {
+                            continue;
+                        }
+
+                        anyFeatureExecuted |= InvokeFeature(parentPath, feature, finderResult);
+                    }
                 }
             }
         }

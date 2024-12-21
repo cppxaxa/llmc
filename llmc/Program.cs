@@ -43,9 +43,13 @@ if (projectLogic.CheckForCleanup(projectPath))
 }
 
 var prompts = projectLogic.ReadPrompts();
+
+projectLogic.ProcessPrebuildFeatures(prompts);
+
 var llmResults = projectLogic.GetLlmResults(prompts);
-var processFeatures = projectLogic.ProcessFeatures(
-    llmResults.Select(e => e.Prompt).ToList());
+
+var processFeatures = projectLogic.ProcessNonPrebuildFeatures(prompts);
+
 string undoContent = string.Empty;
 
 if (!processFeatures.AnyFeatureProcessed)

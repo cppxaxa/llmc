@@ -20,6 +20,8 @@ internal interface IFeature
     
     FileRedactor? FileRedactor { get; set; }
 
+    bool AsPrebuild { get; set; }
+
     // Returns command to undo.
     void Execute(string parentDirectory, string param);
 }

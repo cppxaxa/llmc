@@ -16,6 +16,8 @@ internal abstract class FeatureCommon : IFeature
     public ExecutorInvoker? ExecutorInvoker { get; set; }
     public FileRedactor? FileRedactor { get; set; }
 
+    public virtual bool AsPrebuild { get; set; } = false;
+
     abstract public void Execute(
         string parentDirectory, string param);
 }
