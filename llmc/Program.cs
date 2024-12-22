@@ -73,24 +73,30 @@ if (projectLogic.CheckForCleanup(projectPath))
 
 var prompts = projectLogic.ReadPrompts();
 
-projectLogic.ProcessPrebuildFeatures(prompts);
-
-var llmResults = projectLogic.GetLlmResults(prompts);
-
-var processFeatures = projectLogic.ProcessNonPrebuildFeatures(prompts);
-
-string undoContent = string.Empty;
-
-if (!processFeatures.AnyFeatureProcessed)
+// Handle each prompt separately.
+foreach (var prompt in prompts)
 {
-    undoContent = projectLogic.Process(llmResults);
-}
+    List<Prompt> unitPrompts = [prompt];
 
-if (File.Exists(Path.Join(projectPath, "undo.executor.txt")))
-{
-    undoContent = File.ReadAllText(
-        Path.Join(projectPath, "undo.executor.txt")) +
-        Environment.NewLine + undoContent;
-}
+    projectLogic.ProcessPrebuildFeatures(unitPrompts);
 
-File.WriteAllText(Path.Join(projectPath, "undo.executor.txt"), undoContent);
+    var llmResults = projectLogic.GetLlmResults(unitPrompts);
+
+    var processFeatures = projectLogic.ProcessNonPrebuildFeatures(unitPrompts);
+
+    string undoContent = string.Empty;
+
+    if (!processFeatures.AnyFeatureProcessed)
+    {
+        undoContent = projectLogic.Process(llmResults);
+    }
+
+    if (File.Exists(Path.Join(projectPath, "undo.executor.txt")))
+    {
+        undoContent = File.ReadAllText(
+            Path.Join(projectPath, "undo.executor.txt")) +
+            Environment.NewLine + undoContent;
+    }
+
+    File.WriteAllText(Path.Join(projectPath, "undo.executor.txt"), undoContent);
+}
