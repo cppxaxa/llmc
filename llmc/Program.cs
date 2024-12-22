@@ -1,4 +1,5 @@
 ﻿
+using llmc;
 using llmc.Connector;
 using llmc.Project;
 
@@ -10,12 +11,19 @@ if (args.Length == 1 && (args[0] == "--help" || args[0] == "-h" || args[0] == "/
 }
 
 var llmConfiguration = new Configuration(
+    Type: ConfigurationType.Llm,
     EnabledGemini: true,
     GeminiKeyEnvVar: "GEMINI_API_KEY",
     GeminiUrlEnvVar: string.Empty,
     GeminiUrl: "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={geminikey}");
 
-var llmConnector = new LlmConnector(llmConfiguration);
+var embeddingConfiguration = new Configuration(
+    Type: ConfigurationType.Embedding,
+    EnabledGemini: true,
+    GeminiKeyEnvVar: "GEMINI_API_KEY",
+    GeminiEmbeddingUrl: "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key={geminikey}");
+
+var llmConnector = new LlmConnector([llmConfiguration, embeddingConfiguration]);
 var promptDecorator = new PromptDecorator();
 var promptExtractor = new PromptExtractor();
 var executorFinder = new ExecutorFinder(llmConnector);
