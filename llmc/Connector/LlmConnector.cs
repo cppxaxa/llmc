@@ -27,14 +27,22 @@ internal class LlmConnector(List<Configuration> configurations)
         return new GeminiLlmClient(configurationCache[ConfigurationType.Llm]);
     }
 
-    private GeminiEmbeddingClient GetEmbeddingClient()
+    private IEmbeddingClient GetEmbeddingClient()
     {
         if (!configurationCache.ContainsKey(ConfigurationType.Embedding))
             configurationCache.Add(
                 ConfigurationType.Embedding,
                 configurations.First(e => e.Type == ConfigurationType.Embedding));
 
-        return new GeminiEmbeddingClient(
-            configurationCache[ConfigurationType.Embedding]);
+        if (configurationCache[ConfigurationType.Embedding].EnableGemini)
+        {
+            return new GeminiEmbeddingClient(
+                configurationCache[ConfigurationType.Embedding]);
+        }
+        else
+        {
+            return new AoaiEmbeddingClient(
+                configurationCache[ConfigurationType.Embedding]);
+        }
     }
 }

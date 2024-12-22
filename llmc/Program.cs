@@ -1,5 +1,4 @@
 ﻿
-using llmc;
 using llmc.Connector;
 using llmc.Project;
 
@@ -12,18 +11,40 @@ if (args.Length == 1 && (args[0] == "--help" || args[0] == "-h" || args[0] == "/
 
 var llmConfiguration = new Configuration(
     Type: ConfigurationType.Llm,
-    EnabledGemini: true,
-    GeminiKeyEnvVar: "GEMINI_API_KEY",
-    GeminiUrlEnvVar: string.Empty,
-    GeminiUrl: "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={geminikey}");
+    EnableGemini: true,
+    ApiKeyEnvVar: "GEMINI_API_KEY",
+    AoaiTargetUrl: "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={geminikey}");
 
 var embeddingConfiguration = new Configuration(
     Type: ConfigurationType.Embedding,
-    EnabledGemini: true,
-    GeminiKeyEnvVar: "GEMINI_API_KEY",
+    EnableGemini: true,
+    ApiKeyEnvVar: "GEMINI_API_KEY",
     GeminiEmbeddingUrl: "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key={geminikey}");
 
-var llmConnector = new LlmConnector([llmConfiguration, embeddingConfiguration]);
+var aoaiEmbeddingConfiguration = new Configuration(
+    Type: ConfigurationType.Embedding,
+    EnableAoai: true,
+    ApiKeyEnvVar: "AOAI_API_KEY",
+    AoaiTargetUrl: "https://icanazopenai.openai.azure.com/openai/deployments/text-embedding-ada-002/embeddings?api-version=2023-05-15");
+
+List<Configuration> configurations = [
+    llmConfiguration,
+    aoaiEmbeddingConfiguration,
+    embeddingConfiguration
+];
+
+static void LogEnvironmentVariablesName(List<Configuration> configurations)
+{
+    foreach (var configuration in configurations)
+    {
+        Console.WriteLine($"ApiKeyEnvVar: {configuration.ApiKeyEnvVar}");
+        Console.WriteLine($"GeminiUrlEnvVar: {configuration.GeminiUrlEnvVar}");
+    }
+}
+
+LogEnvironmentVariablesName(configurations);
+
+var llmConnector = new LlmConnector(configurations);
 var promptDecorator = new PromptDecorator();
 var promptExtractor = new PromptExtractor();
 var executorFinder = new ExecutorFinder(llmConnector);

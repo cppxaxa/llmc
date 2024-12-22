@@ -8,9 +8,9 @@ internal class GeminiLlmClient(Configuration configuration)
 {
     internal string Complete(string prompt)
     {
-        if (configuration.EnabledGemini)
+        if (configuration.EnableGemini)
         {
-            string key = Environment.GetEnvironmentVariable(configuration.GeminiKeyEnvVar)!;
+            string key = Environment.GetEnvironmentVariable(configuration.ApiKeyEnvVar)!;
             string url = Environment.GetEnvironmentVariable(configuration.GeminiUrlEnvVar)
                 ?? configuration.GeminiUrl;
 

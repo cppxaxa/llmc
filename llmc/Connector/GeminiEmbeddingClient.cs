@@ -4,16 +4,16 @@ using System.Text;
 
 namespace llmc.Connector;
 
-internal class GeminiEmbeddingClient(Configuration configuration)
+internal class GeminiEmbeddingClient(Configuration configuration) : IEmbeddingClient
 {
-    internal float[]? GetEmbedding(string text)
+    public float[]? GetEmbedding(string text)
     {
-        if (configuration.EnabledGemini)
+        if (configuration.EnableGemini)
         {
             try
             {
                 // Fetch API key and URL.
-                string key = Environment.GetEnvironmentVariable(configuration.GeminiKeyEnvVar)!;
+                string key = Environment.GetEnvironmentVariable(configuration.ApiKeyEnvVar)!;
                 string url = $"https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key={key}";
 
                 // Initialize HTTP client.

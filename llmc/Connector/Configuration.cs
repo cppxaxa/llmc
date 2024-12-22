@@ -1,4 +1,4 @@
 ﻿namespace llmc.Connector;
 
 internal record Configuration(
-    ConfigurationType Type, bool EnabledGemini, string GeminiKeyEnvVar, string GeminiUrlEnvVar = "", string GeminiUrl = "", string GeminiEmbeddingUrl = "");
+    ConfigurationType Type, string ApiKeyEnvVar = "", bool EnableAoai = false, bool EnableGemini = false, string GeminiUrlEnvVar = "", string GeminiUrl = "", string AoaiTargetUrl = "", string GeminiEmbeddingUrl = "");
