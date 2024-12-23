@@ -62,3 +62,7 @@ internal class GeminiEmbeddingClient(Configuration configuration) : IEmbeddingCl
         return null;
     }
 }
+
+internal record EmbeddingResult(EmbeddingData Embedding);
+
+internal record EmbeddingData(float[] Values);

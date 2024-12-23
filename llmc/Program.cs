@@ -9,13 +9,19 @@ if (args.Length == 1 && (args[0] == "--help" || args[0] == "-h" || args[0] == "/
     Console.WriteLine("* Rename the undo file to cleanup.executor.txt - So whenever llmc runs and finds this file, it will execute all undo operation and then stop");
 }
 
-var llmConfiguration = new Configuration(
+var geminiLlmConfiguration = new Configuration(
     Type: ConfigurationType.Llm,
     EnableGemini: true,
     ApiKeyEnvVar: "GEMINI_API_KEY",
-    AoaiTargetUrl: "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={geminikey}");
+    Url: "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={geminikey}");
 
-var embeddingConfiguration = new Configuration(
+var aoaiLlmConfiguration = new Configuration(
+    Type: ConfigurationType.Llm,
+    EnableAoai: true,
+    ApiKeyEnvVar: "AOAI_API_KEY",
+    Url: "https://icanazopenai.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-10-21");
+
+var geminiEmbeddingConfiguration = new Configuration(
     Type: ConfigurationType.Embedding,
     EnableGemini: true,
     ApiKeyEnvVar: "GEMINI_API_KEY",
@@ -25,12 +31,13 @@ var aoaiEmbeddingConfiguration = new Configuration(
     Type: ConfigurationType.Embedding,
     EnableAoai: true,
     ApiKeyEnvVar: "AOAI_API_KEY",
-    AoaiTargetUrl: "https://icanazopenai.openai.azure.com/openai/deployments/text-embedding-ada-002/embeddings?api-version=2023-05-15");
+    Url: "https://icanazopenai.openai.azure.com/openai/deployments/text-embedding-ada-002/embeddings?api-version=2023-05-15");
 
 List<Configuration> configurations = [
-    llmConfiguration,
+    aoaiLlmConfiguration,
+    geminiLlmConfiguration,
     aoaiEmbeddingConfiguration,
-    embeddingConfiguration
+    geminiEmbeddingConfiguration
 ];
 
 static void LogEnvironmentVariablesName(List<Configuration> configurations)

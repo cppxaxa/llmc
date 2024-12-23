@@ -4,15 +4,15 @@ using System.Text;
 
 namespace llmc.Connector;
 
-internal class GeminiLlmClient(Configuration configuration)
+internal class GeminiLlmClient(Configuration configuration) : ILlmClient
 {
-    internal string Complete(string prompt)
+    public string Complete(string prompt)
     {
         if (configuration.EnableGemini)
         {
             string key = Environment.GetEnvironmentVariable(configuration.ApiKeyEnvVar)!;
             string url = Environment.GetEnvironmentVariable(configuration.GeminiUrlEnvVar)
-                ?? configuration.GeminiUrl;
+                ?? configuration.Url;
 
             url = url.Replace("{geminikey}", key);
 
@@ -47,7 +47,7 @@ internal class GeminiLlmClient(Configuration configuration)
             var responseContent = response.Content.ReadAsStringAsync().Result;
 
             // Deserialize the response.
-            var responseObj = JsonConvert.DeserializeObject<CompletionResult>(responseContent);
+            var responseObj = JsonConvert.DeserializeObject<GeminiCompletionResult>(responseContent);
 
             return responseObj!.Candidates[0].Content.Parts[0].Text;
         }
@@ -55,3 +55,40 @@ internal class GeminiLlmClient(Configuration configuration)
         return string.Empty;
     }
 }
+
+public record GeminiCompletionResult(
+    List<GeminiCandidate> Candidates,
+    GeminiUsageMetadata UsageMetadata,
+    string ModelVersion
+);
+
+public record GeminiCandidate(
+    GeminiContent Content,
+    string FinishReason,
+    GeminiCitationMetadata CitationMetadata,
+    double AvgLogprobs
+);
+
+public record GeminiContent(
+    List<GeminiPart> Parts,
+    string Role
+);
+
+public record GeminiPart(
+    string Text
+);
+
+public record GeminiCitationMetadata(
+    List<GeminiCitationSource> CitationSources
+);
+
+public record GeminiCitationSource(
+    int EndIndex,
+    string Uri
+);
+
+public record GeminiUsageMetadata(
+    int PromptTokenCount,
+    int CandidatesTokenCount,
+    int TotalTokenCount
+);

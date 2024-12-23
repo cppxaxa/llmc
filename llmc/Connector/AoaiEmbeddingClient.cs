@@ -12,7 +12,7 @@ internal class AoaiEmbeddingClient(Configuration configuration) : IEmbeddingClie
             string apiKey = Environment.GetEnvironmentVariable(configuration.ApiKeyEnvVar)
                 ?? throw new InvalidOperationException("API key environment variable is not set.");
 
-            string targetUrl = configuration.AoaiTargetUrl
+            string targetUrl = configuration.Url
                 ?? throw new InvalidOperationException("AOAI target URL is not configured.");
 
             // Get HTTP client.
@@ -51,17 +51,17 @@ internal class AoaiEmbeddingClient(Configuration configuration) : IEmbeddingClie
 
     private class EmbeddingResponse
     {
-        public string Object { get; set; }
-        public List<EmbeddingData> Data { get; set; }
-        public string Model { get; set; }
-        public UsageInfo Usage { get; set; }
+        public string Object { get; set; } = string.Empty;
+        public List<EmbeddingData> Data { get; set; } = [];
+        public string Model { get; set; } = string.Empty;
+        public UsageInfo Usage { get; set; } = new();
     }
 
     private class EmbeddingData
     {
-        public string Object { get; set; }
+        public string Object { get; set; } = string.Empty;
         public int Index { get; set; }
-        public float[] Embedding { get; set; }
+        public float[] Embedding { get; set; } = [];
     }
 
     private class UsageInfo
