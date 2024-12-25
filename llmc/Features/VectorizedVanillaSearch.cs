@@ -23,6 +23,8 @@ internal class VectorizedVanillaSearch : FeatureCommon
         string source = p["source"];
         string file = p["file"];
         string nresults = p["nresults"];
+        string slidingwordsize = p["slidingwordsize"];
+        string slidingwordoverlap = p["slidingwordoverlap"];
 
         int page = int.Parse(nresults);
         string outFilePath = Path.Combine(parentDirectory, file);
@@ -46,15 +48,20 @@ internal class VectorizedVanillaSearch : FeatureCommon
         }
 
         // Search.
-        float[] vector = Connector.GetEmbedding(promptText)
-            ?? throw new Exception("Error in getting embedding for search");
-        var result = SearchVector(vector, page);
+        List<string> brokenPromptList = BreakPrompts(promptText, slidingwordsize, slidingwordoverlap);
 
-        StringBuilder searchResult = new();
+        HashSet<string> searchResult = new();
 
-        foreach (var r in result)
+        foreach (var brokenPrompt in brokenPromptList)
         {
-            searchResult.AppendLine(r.Label);
+            float[] vector = Connector.GetEmbedding(brokenPrompt)
+                ?? throw new Exception("Error in getting embedding for search");
+            var result = SearchVector(vector, page);
+
+            foreach (var r in result)
+            {
+                searchResult.Add(r.Label);
+            }
         }
 
         if (File.Exists(outFilePath))
@@ -68,12 +75,63 @@ internal class VectorizedVanillaSearch : FeatureCommon
         }
 
         // Save the search result.
-        File.WriteAllText(outFilePath, searchResult.ToString());
+        File.WriteAllText(outFilePath, string.Join(Environment.NewLine, searchResult));
 
         res = ExecutorInvoker.Invoke(parentDirectory, new ExecutorFinderResult(
             "AppendUndo", $"fn=\"DeleteFile\",filename=\"{file}\""));
 
         undo.AppendLine(res);
+    }
+
+    private List<string> BreakPrompts(
+        string promptText, string slidingwordsizeStr, string slidingwordoverlapStr)
+    {
+        int slidingWordSize = int.Parse(slidingwordsizeStr);
+        int slidingWordOverlap = int.Parse(slidingwordoverlapStr);
+
+        // Validations.
+        if (slidingWordOverlap < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(slidingWordOverlap), "Must be greater than 0");
+        }
+
+        if (slidingWordSize < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(slidingWordSize), "Must be greater than 0");
+        }
+
+        if (slidingWordOverlap > slidingWordSize)
+        {
+            throw new ArgumentException(nameof(slidingWordOverlap), "Must be less than slidingWordSize");
+        }
+
+        string[] tokens = promptText.Split(' ');
+        int i = 0;
+
+        List<string> result = [];
+
+        while (i < tokens.Length)
+        {
+            StringBuilder query = new();
+
+            int nWordsLimit = Math.Min(slidingWordSize, tokens.Length - i);
+
+            for (int j = 0; j < nWordsLimit; j++)
+            {
+                query.Append(tokens[i + j]);
+                query.Append(" ");
+            }
+            
+            result.Add(query.ToString());
+
+            if (i + nWordsLimit >= tokens.Length)
+                break;
+
+            // Increment.
+            i = i + nWordsLimit - slidingWordOverlap;
+        }
+
+        return result;
     }
 
     // Collection to store vectors and their associated strings

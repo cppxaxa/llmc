@@ -1,4 +1,4 @@
 PreBuild:
-- DeleteFolder(folder="somedatavector")
-- VectorizeVanilla(jsonlfolder="somedata",out="somedatavector")
+- DeleteFolder(folder="dimensionsvector")
+- VectorizeVanilla(jsonlfolder="dimensionsdata",searchjsonkey="searchtext",out="dimensionsvector")
 ---

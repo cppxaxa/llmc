@@ -1,0 +1,23 @@
+---
+CampaignType:
+  - Search
+  - Shopping
+DeviceType:
+  - Meaning:
+      The DeviceType filter is used to determine if an ad was clicked on a PC or a tablet. This filter can be used to track the effectiveness of ad campaigns and determine the return on investment for advertisers.
+  - PC
+  - HiFi Phone
+Market:
+  - United States
+  - United Kingdom
+  - People's Republic of China:
+    - InsteadOf:
+        - China
+Network:
+  - Yahoo:
+    - Syndication:
+      - Distinct Media (aka forsight):
+        - 944335-X0558555:
+          - 11725907
+          - 11726343
+          - 11723278

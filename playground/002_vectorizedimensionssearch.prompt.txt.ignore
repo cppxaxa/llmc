@@ -1,4 +1,4 @@
 Features:
-- VectorizedVanillaSearch(source="somedatavector",nresults="5",file="search-result.jsonl")
+- VectorizedVanillaSearch(source="dimensionsvector",nresults="5",file="search-result.jsonl",slidingwordsize="4",slidingwordoverlap="2")
 ---
-Implement a quick sort in Java with toy example
+Tell me ad clicks for US market from device PC and it should be Shopping ad

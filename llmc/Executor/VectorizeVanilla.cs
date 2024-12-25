@@ -16,6 +16,8 @@ internal class VectorizeVanilla : ExecutorCommon
         Dictionary<string, string> p = Common.ParseParam(param);
         string jsonlfolder = p["jsonlfolder"];
         string outFolder = p["out"];
+        string searchJsonKey = p["searchjsonkey"];
+
         string fullOutFolder = Path.Combine(parentDirectory, outFolder);
 
         if (!Directory.Exists(fullOutFolder))
@@ -35,34 +37,15 @@ internal class VectorizeVanilla : ExecutorCommon
 
             foreach (var l in lines)
             {
-                List<string> keys = [];
-                List<string> values = [];
+                JObject jObject = JsonConvert.DeserializeObject<JObject>(l)
+                    ?? throw new Exception("Error in parsing jsonl file");
 
-                try
-                {
-                    var jObject = JsonConvert.DeserializeObject<JObject>(l)
-                        ?? throw new Exception("Error in parsing jsonl file");
+                string? toVectorize = jObject[searchJsonKey]?.ToString();
 
-                    foreach (var item in jObject)
-                    {
-                        keys.Add(item.Key);
-                        values.Add(item.Value?.ToString() ?? string.Empty);
-                    }
-                }
-                catch
+                if (toVectorize == null)
                 {
                     Console.WriteLine($"Error in parsing jsonl file {f}");
-                }
-
-                // Process keys.
-                StringBuilder toVectorize = new();
-
-                for (int i = 0; i < keys.Count; i++)
-                {
-                    if (!keys[i].StartsWith('_'))
-                    {
-                        toVectorize.AppendLine($"{keys[i]} = {values[i]}\n");
-                    }
+                    continue;
                 }
 
                 float[]? embedding = Connector.GetEmbedding(toVectorize.ToString())
