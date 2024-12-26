@@ -1,0 +1,19 @@
+PostBuild:
+- ExecuteCmd(batchCode="index.html")
+---
+What:
+Write a single html file "index.html".
+It should render some javascript, css, html buttons to build a functional calculator.
+
+Design:
+Place buttons like a normal calculator.
+Size of button text should be large as we're making it accessible to weak eye sight.
+All the text and button should be OCR detectable.
+Design should be pointy and rectangular heavy.
+Should look elegant and high contrast black and white.
+
+Function:
+Support basic operations binary operators +, -, *, / and unary operators x power of y, sqrt of x.
+
+Additional request:
+Give the instructions to save the file as index.html

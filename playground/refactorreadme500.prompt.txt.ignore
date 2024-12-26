@@ -1,8 +1,5 @@
 Features:
 - Rewrite500(repo="samplebigrepo_changes_500",wildcard="*.*")
-Prompt:
-- IncludeDateTime
-- IncludeLs
 PreBuild:
 - DeleteFolder(folder="samplerepo_changes_500")
 - CopyFolder(source="samplebigrepo",destination="samplebigrepo_changes_500")

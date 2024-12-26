@@ -1,4 +1,4 @@
-PostBuild:
+PreBuild:
 - ExecuteCmd(batchCode="index.html")
 - Comment(Give some time to browser)
 - TaskDelay(millis="1000")

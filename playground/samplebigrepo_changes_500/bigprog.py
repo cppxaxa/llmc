@@ -75,3 +75,5 @@ for i in range(4):
     root.columnconfigure(i, weight=1)
 for i in range(len(buttons)//4+1):
     root.rowconfigure(i, weight=1)
+
+root.mainloop()

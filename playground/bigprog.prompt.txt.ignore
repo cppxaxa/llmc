@@ -1,0 +1,8 @@
+PostBuild:
+---
+Write a single python file "bigprog.py".
+It should use Tkinter library.
+It should render a functional calculator.
+Keep it colorful with good typography and elegant.
+Support basic operations binary operators +, -, *, / and unary operators pow, sqrt.
+Give the instructions to save the file as bigprog.py

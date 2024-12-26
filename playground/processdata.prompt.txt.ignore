@@ -1,6 +1,3 @@
-Prompt:
-- IncludeDateTime
-- IncludeLs
 PostBuild:
 - ExecutePython(filename="program.py")
 AppendToCleanup:
