@@ -75,12 +75,32 @@ internal class VectorizedVanillaSearch : FeatureCommon
         }
 
         // Save the search result.
+        string searchResultParentDirectory = Path.GetDirectoryName(outFilePath)
+            ?? throw new Exception("Error in getting parent directory");
+
+        List<ExecutorFinderResult> appendUndoList = [];
+
+        if (!Directory.Exists(searchResultParentDirectory))
+        {
+            Directory.CreateDirectory(searchResultParentDirectory);
+
+            appendUndoList.Add(new ExecutorFinderResult(
+                "AppendUndo", $"fn=\"DeleteFolder\",folder=\"{searchResultParentDirectory}\""));
+        }
+
         File.WriteAllText(outFilePath, string.Join(Environment.NewLine, searchResult));
 
-        res = ExecutorInvoker.Invoke(parentDirectory, new ExecutorFinderResult(
+        appendUndoList.Add(new ExecutorFinderResult(
             "AppendUndo", $"fn=\"DeleteFile\",filename=\"{file}\""));
 
-        undo.AppendLine(res);
+        // Add all undo.
+        foreach (var appendUndoAction in appendUndoList)
+        {
+            ExecutorInvoker.Invoke(parentDirectory, appendUndoAction);
+        }
+
+        ExecutorInvoker.Invoke(parentDirectory, new ExecutorFinderResult(
+            "AppendUndo", $"dump={JsonConvert.SerializeObject(undo.ToString())}"));
     }
 
     private List<string> BreakPrompts(
