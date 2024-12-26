@@ -1,12 +1,13 @@
 Features:
-- Rewrite100(repo="search-results-test",wildcard="*.*")
+- Rewrite100(repo="search-results-test",wildcard="*.md")
 PreBuild:
 - DeleteFolder(folder="search-results-test")
 - CopyFolder(source="search-results",destination="search-results-test")
+- ProcessHandlebarsSyntax(folder="search-results-test",wildcard="*.md")
 ---
 You are an intelligent natural language processor, powered by AI.
-Give instructions to write complete README.md with minimal changes.
-I want you to revise the README.md to fix and replace <TODO> with only relevant json lines out of pool of json from search-result.jsonl for the user query
+I want you to fix the TODO in README.md with minimal changes.
+The filtered json are shortlisted json lines from pool of json mentioned in README.md
+based on the following user query
 "Tell me ad clicks for US market from device PC and it should be Shopping ad"
-Read the search-result.jsonl file to get pool of json. Your result should be scoped only to this.
-But write to only one file = README.md
+Give instructions to write README.md with new content.
