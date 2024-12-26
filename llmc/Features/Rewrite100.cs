@@ -74,8 +74,6 @@ internal class Rewrite100 : FeatureCommon
         fileModificationPrompt.AppendLine(header.ToString());
         fileModificationPrompt.AppendLine(contentPrompt.ToString());
 
-        List<List<ExecutorFinderResult>> compiledFinderResults = [];
-
         for (int i = 0; i < fileNames.Count ; i++)
         {
             if (IsFileRewriteRequired(fileNames[i], metaFileContents[i]))
@@ -86,25 +84,81 @@ internal class Rewrite100 : FeatureCommon
                     $"Give the new content for file {fileNames[i]}:{Environment.NewLine}";
                 string newContent = Connector.Complete(prompt);
 
-                string writerContent = $"Write the contents to the file{Environment.NewLine}" +
-                    $"Filename: {fileNames[i]}{Environment.NewLine}" +
-                    $"Content: {Environment.NewLine}" +
-                    $"{newContent}";
+                string rawFileContent = GetRawFileContent(fileNames[i], newContent);
 
-                List<ExecutorFinderResult> finderResults = ExecutorFinder.Find(writerContent);
-
-                compiledFinderResults.Add(finderResults);
+                // Write the file.
+                File.WriteAllText(Path.Join(parentDirectory, fileNames[i]), rawFileContent);
             }
         }
+    }
 
-        // Execute.
-        foreach (var finderResults in compiledFinderResults)
+    private string GetRawFileContent(string filename, string contentToParse)
+    {
+        EnsureThat.EnsureArg.IsNotNull(Connector, nameof(Connector));
+
+        string html1 =
+            $"<html>{Environment.NewLine}" +
+            $"  <head>Hello</head>{Environment.NewLine}" +
+            $"  <body>Hello Everyone!<br/>{Environment.NewLine}" +
+            $"  <textarea>{Environment.NewLine}" +
+            $"  ```markdown{Environment.NewLine}" +
+            $"  ## Header{Environment.NewLine}" +
+            $"  ```{Environment.NewLine}" +
+            $"  </textarea></body>{Environment.NewLine}" +
+            $"</html>{Environment.NewLine}";
+
+        string queryPrefix = "Here is the content for the file '{filename}'";
+
+        string query1 = queryPrefix.Replace("{filename}", "abc/greet.html") + $"{Environment.NewLine}" +
+            $"{Environment.NewLine}" +
+            $"```html{Environment.NewLine}" +
+            html1 +
+            $"```{Environment.NewLine}" +
+            $"This concludes the html file contents that can help you greet with minimal changes.";
+
+        string promptPrefix = $"# Give me the raw file contents by extracting from a natural langauage " +
+            $"converation:{Environment.NewLine}" +
+            $"{Environment.NewLine}";
+
+        string prompt = promptPrefix +
+            $"# A sample conversation is as follows:{Environment.NewLine}" +
+            $"{query1}{Environment.NewLine}" +
+            $"---{Environment.NewLine}" +
+            $"# Then we extract the raw content of top level annotation, in the case of our " +
+            $"sample it is{Environment.NewLine}" +
+            $"{html1}{Environment.NewLine}" +
+            $"---{Environment.NewLine}" +
+            $"# Now, for the following actual conversation, respond back with the raw content of top level annotations only for file {filename}:{Environment.NewLine}" +
+            $"{Environment.NewLine}" +
+            $"{contentToParse}{Environment.NewLine}" +
+            $"---{Environment.NewLine}";
+
+        string result = Connector.Complete(prompt);
+
+        string resultWithoutCodeAnnotation = RemoveCodeAnnotation(result);
+
+        return resultWithoutCodeAnnotation;
+    }
+
+    private static string RemoveCodeAnnotation(string content)
+    {
+        string separator = Common.FindLineSeparator(content);
+
+        string[] lines = content.Trim().Split(separator, StringSplitOptions.None);
+
+        List<string> lineList = new(lines);
+
+        if (lineList.Count > 0 && lineList[0].StartsWith("```"))
         {
-            foreach (var result in finderResults)
-            {
-                ExecutorInvoker.Invoke(parentDirectory, result);
-            }
+            lineList.RemoveAt(0);
         }
+
+        if (lineList.Count > 0 && lineList[lineList.Count - 1].StartsWith("```"))
+        {
+            lineList.RemoveAt(lineList.Count - 1);
+        }
+
+        return string.Join(separator, lineList);
     }
 
     private bool IsFileRewriteRequired(string filename, string meta)
