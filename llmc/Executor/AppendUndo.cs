@@ -9,13 +9,28 @@ internal class AppendUndo : ExecutorCommon
     {
         StringBuilder undo = new();
 
-        Dictionary<string, string> p = Common.ParseParam(param);
-        string source = p["fn"];
-        List<string> remainingParams = p.Where(e => e.Key != "fn")
-            .Select(e => $"{e.Key}=\"{e.Value}\"").ToList();
+        string undoFilename = Path.Combine(parentDirectory, "undo.executor.txt");
 
-        undo.Append($"{source}({string.Join(',', remainingParams)})");
-        
+        Dictionary<string, string> p = Common.ParseParam(param);
+        string? dump = p.TryGetValue("dump", out string? strVal) ? strVal : null;
+
+        if (dump != null)
+        {
+            File.AppendAllLines(undoFilename, new[] { dump });
+            return undo.ToString();
+        }
+        else
+        {
+            string source = p["fn"];
+
+            List<string> remainingParams = p.Where(e => e.Key != "fn")
+                .Select(e => $"{e.Key}=\"{e.Value}\"").ToList();
+
+            File.AppendAllLines(undoFilename, new[] {
+                $"{source}({string.Join(',', remainingParams)})"
+            });
+        }
+
         return undo.ToString();
     }
 }
