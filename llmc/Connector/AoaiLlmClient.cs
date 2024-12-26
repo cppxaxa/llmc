@@ -38,11 +38,32 @@ internal class AoaiLlmClient(Configuration configuration) : ILlmClient
 
             var content = new StringContent(body, Encoding.UTF8, "application/json");
 
-            // Send the request.
-            var response = client.PostAsync(url, content).Result;
+            HttpResponseMessage response = null!;
 
-            // Ensure successful response.
-            response.EnsureSuccessStatusCode();
+            int retryCount = 3;
+
+            for (int i = 0; i < retryCount; i++)
+            {
+                try
+                {
+                    // Send the request.
+                    response = client.PostAsync(url, content).Result;
+
+                    // Ensure successful response.
+                    if (response.IsSuccessStatusCode)
+                    {
+                        break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to send request to Azure OpenAI: {ex.Message}");
+
+                    if (i == retryCount - 1) throw;
+                }
+
+                Thread.Sleep(5000);
+            }
 
             // Read the response.
             var responseContent = response.Content.ReadAsStringAsync().Result;

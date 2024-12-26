@@ -40,8 +40,32 @@ internal class GeminiLlmClient(Configuration configuration) : ILlmClient
             // Set the prompt as body.
             var content = new StringContent(body, Encoding.UTF8, "application/json");
 
-            // Send the request.
-            var response = client.PostAsync(url, content).Result;
+            HttpResponseMessage response = null!;
+
+            int retryCount = 3;
+
+            for (int i = 0; i < retryCount; i++)
+            {
+                try
+                {
+                    // Send the request.
+                    response = client.PostAsync(url, content).Result;
+
+                    // Ensure successful response.
+                    if (response.IsSuccessStatusCode)
+                    {
+                        break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to send request to Gemini LLM: {ex.Message}");
+
+                    if (i == retryCount - 1) throw;
+                }
+
+                Thread.Sleep(5000);
+            }
 
             // Read the response.
             var responseContent = response.Content.ReadAsStringAsync().Result;
