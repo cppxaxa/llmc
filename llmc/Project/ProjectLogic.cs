@@ -91,6 +91,24 @@ internal class ProjectLogic(
         return string.Join(Environment.NewLine, undo);
     }
 
+    public string PostProcess(Prompt prompt)
+    {
+        Console.WriteLine($"PreProcess individual prompt {prompt}");
+
+        List<string> undo = [];
+
+        // Pre build.
+        if (prompt.PostBuild != null)
+        {
+            foreach (var postBuild in prompt.PostBuild)
+            {
+                undo.Insert(0, executorInvoker.Invoke(parentPath, postBuild));
+            }
+        }
+
+        return string.Join(Environment.NewLine, undo);
+    }
+
     public string Process(LlmResult result)
     {
         Console.WriteLine($"Process individual result {result}");
@@ -102,15 +120,6 @@ internal class ProjectLogic(
         foreach (var finderResult in finderResults)
         {
             undo.Insert(0, executorInvoker.Invoke(parentPath, finderResult));
-        }
-
-        // Post build.
-        if (result.Prompt.PostBuild != null)
-        {
-            foreach (var postBuild in result.Prompt.PostBuild)
-            {
-                undo.Insert(0, executorInvoker.Invoke(parentPath, postBuild));
-            }
         }
 
         // Append to cleanup.

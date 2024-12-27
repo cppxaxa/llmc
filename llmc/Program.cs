@@ -98,6 +98,12 @@ foreach (var prompt in prompts)
         undoContent = projectLogic.Process(llmResults);
     }
 
+    // Post process.
+    foreach (var unitPrompt in unitPrompts)
+    {
+        undoContent += projectLogic.PostProcess(unitPrompt);
+    }
+
     if (File.Exists(Path.Join(projectPath, "undo.executor.txt")))
     {
         undoContent = File.ReadAllText(
