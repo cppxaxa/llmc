@@ -7,7 +7,18 @@ if (args.Length == 1 && (args[0] == "--help" || args[0] == "-h" || args[0] == "/
     Console.WriteLine("* It looks for *.llmc.json as a project file. There should be only one such file in the directory.");
     Console.WriteLine("* It generates undo.executor.txt for any undo operation");
     Console.WriteLine("* Rename the undo file to cleanup.executor.txt - So whenever llmc runs and finds this file, it will execute all undo operation and then stop");
+
+    Console.WriteLine("Commandline parameters:");
+    Console.WriteLine("llmc.exe --help | -h | /? : Display this help message");
+    Console.WriteLine("llmc.exe --noundo : Do not generate undo.executor.txt file");
+
+    return;
 }
+
+// Commandline parameters.
+bool noUndo = args.Contains("--noundo");
+
+CommandLineParams commandLineParams = new(NoUndo: noUndo);
 
 var geminiLlmConfiguration = new Configuration(
     Type: ConfigurationType.Llm,
@@ -58,18 +69,19 @@ var executorFinder = new ExecutorFinder(llmConnector);
 var executorInvoker = new ExecutorInvoker(llmConnector);
 var fileRedactor = new FileRedactor(llmConnector, executorInvoker);
 string projectPath = Directory.GetCurrentDirectory();
-var projectLogic = new ProjectLogic(projectPath, llmConnector, promptDecorator, promptExtractor, executorFinder, executorInvoker, fileRedactor);
+var projectLogic = new ProjectLogic(projectPath, commandLineParams, llmConnector, promptDecorator, promptExtractor, executorFinder, executorInvoker, fileRedactor);
 
-var projectJson = projectLogic.ReadProjectJson();
+var projectJson = projectLogic.ReadProjectJson(projectPath);
 
 if (projectJson == null)
 {
     projectPath = @"C:\B\L1\llmc\playground";
+    projectJson = projectLogic.ReadProjectJson(@"C:\B\L1\llmc\playground");
+
+    projectLogic = new ProjectLogic(projectPath, commandLineParams, llmConnector, promptDecorator, promptExtractor, executorFinder, executorInvoker, fileRedactor);
 }
 
 AppContext.SetSwitch("System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization", true);
-
-projectLogic = new ProjectLogic(projectPath, llmConnector, promptDecorator, promptExtractor, executorFinder, executorInvoker, fileRedactor);
 
 if (projectLogic.CheckForCleanup(projectPath))
 {
@@ -104,12 +116,15 @@ foreach (var prompt in prompts)
         undoContent += projectLogic.PostProcess(unitPrompt);
     }
 
-    if (File.Exists(Path.Join(projectPath, "undo.executor.txt")))
+    if (!commandLineParams.NoUndo)
     {
-        undoContent = File.ReadAllText(
-            Path.Join(projectPath, "undo.executor.txt")) +
-            Environment.NewLine + undoContent;
-    }
+        if (File.Exists(Path.Join(projectPath, "undo.executor.txt")))
+        {
+            undoContent = File.ReadAllText(
+                Path.Join(projectPath, "undo.executor.txt")) +
+                Environment.NewLine + undoContent;
+        }
 
-    File.WriteAllText(Path.Join(projectPath, "undo.executor.txt"), undoContent);
+        File.WriteAllText(Path.Join(projectPath, "undo.executor.txt"), undoContent);
+    }
 }

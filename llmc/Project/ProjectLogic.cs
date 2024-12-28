@@ -12,6 +12,7 @@ namespace llmc.Project;
 
 internal class ProjectLogic(
     string parentPath,
+    CommandLineParams commandLineParams,
     LlmConnector connector,
     PromptDecorator promptDecorator,
     PromptExtractor promptExtractor,
@@ -144,6 +145,7 @@ internal class ProjectLogic(
         else
         {
             // Inject dependencies.
+            feature.NoUndo = commandLineParams.NoUndo;
             feature.Connector = connector;
             feature.Prompt = prompt;
             feature.ExecutorFinder = executorFinder;
@@ -164,10 +166,9 @@ internal class ProjectLogic(
         return true;
     }
 
-    internal object? ReadProjectJson()
+    internal object? ReadProjectJson(string directory)
     {
-        var projects = Directory.GetFiles(
-            Directory.GetCurrentDirectory(), "*.llmc.json");
+        var projects = Directory.GetFiles(directory, "*.llmc.json");
 
         if (projects.Length == 1)
         {

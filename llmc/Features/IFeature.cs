@@ -10,6 +10,8 @@ namespace llmc.Features;
 
 internal interface IFeature
 {
+    bool NoUndo { get; set; }
+
     LlmConnector? Connector { get; set; }
 
     Prompt? Prompt { get; set; }
