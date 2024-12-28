@@ -29,6 +29,16 @@ namespace llmc.Project
             }
         }
 
+        internal static string ApplyProjectMacros(ProjectModel project, string fileContent)
+        {
+            foreach (var promptMacro in project.Macros)
+            {
+                fileContent = fileContent.Replace(promptMacro.Key, promptMacro.Value);
+            }
+
+            return fileContent;
+        }
+
         internal static Dictionary<string, string> ParseParam(string param)
         {
             string somewhatJson = param.Replace("=\"", ":\"");

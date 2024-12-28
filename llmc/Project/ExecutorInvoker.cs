@@ -6,6 +6,7 @@ using System.Reflection;
 namespace llmc.Project;
 
 internal class ExecutorInvoker(
+    ProjectModel project,
     LlmConnector connector)
 {
     internal string Invoke(string parentPath, ExecutorFinderResult finderResult)
@@ -18,6 +19,7 @@ internal class ExecutorInvoker(
         else
         {
             // Inject dependencies.
+            executor.Project = project;
             executor.Connector = connector;
 
             Console.WriteLine($"Executing {finderResult.ClassName} with param {finderResult.Param}");

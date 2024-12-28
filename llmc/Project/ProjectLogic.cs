@@ -1,6 +1,7 @@
 ﻿using llmc.Connector;
 using llmc.Executor;
 using llmc.Features;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,7 @@ namespace llmc.Project;
 
 internal class ProjectLogic(
     string parentPath,
+    ProjectModel project,
     CommandLineParams commandLineParams,
     LlmConnector connector,
     PromptDecorator promptDecorator,
@@ -20,6 +22,22 @@ internal class ProjectLogic(
     ExecutorInvoker executorInvoker,
     FileRedactor fileRedactor)
 {
+    public void Validate()
+    {
+        if (project == null)
+        {
+            throw new ArgumentException("Project file not found", nameof(project));
+        }
+
+        if (project.Macros.Keys
+            .Where(e => !e.StartsWith("{{{") || !e.EndsWith("}}}")).Any())
+        {
+            throw new ArgumentException(
+                "Macro should start with '{{{' and end with '}}}'",
+                nameof(project.Macros));
+        }
+    }
+
     public List<Prompt> ReadPrompts()
     {
         List<string> prompts = [];
@@ -29,6 +47,10 @@ internal class ProjectLogic(
             if (file.EndsWith(".prompt.txt"))
             {
                 string fileContent = File.ReadAllText(file);
+
+                // Apply prompt macros.
+                fileContent = Common.ApplyProjectMacros(project, fileContent);
+
                 prompts.Add(fileContent);
             }
         }
@@ -166,13 +188,13 @@ internal class ProjectLogic(
         return true;
     }
 
-    internal object? ReadProjectJson(string directory)
+    public static ProjectModel? ReadProjectJson(string directory)
     {
         var projects = Directory.GetFiles(directory, "*.llmc.json");
 
         if (projects.Length == 1)
         {
-            return projects.First();
+            return JsonConvert.DeserializeObject<ProjectModel>(File.ReadAllText(projects[0]));
         }
 
         if (projects.Length > 1)

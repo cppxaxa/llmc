@@ -11,10 +11,15 @@ using System.Web;
 
 namespace llmc.Executor
 {
-    internal class ProcessHandlebarsSyntax : ExecutorCommon
+    internal class ApplyMacros : ExecutorCommon
     {
+        /// <summary>
+        /// Applies the project macros over handlebar syntax.
+        /// </summary>
         public override string Execute(string parentDirectory, string param)
         {
+            EnsureThat.EnsureArg.IsNotNull(Project, nameof(Project));
+
             StringBuilder undo = new();
 
             Dictionary<string, string> p = Common.ParseParam(param);
@@ -30,6 +35,8 @@ namespace llmc.Executor
                 if (File.Exists(filename))
                 {
                     originalContent = File.ReadAllText(filename);
+
+                    originalContent = Common.ApplyProjectMacros(Project, originalContent);
 
                     string newFilename = filename + ".bak-" + Guid.NewGuid();
                     File.Move(filename, newFilename);
@@ -64,7 +71,7 @@ namespace llmc.Executor
                 if (content.Length >= limit)
                 {
                     content = content.Substring(0, limit);
-                    Console.WriteLine($"{nameof(ProcessHandlebarsSyntax)}: Trimmed content of {filename} to {limit} characters.");
+                    Console.WriteLine($"{nameof(ApplyMacros)}: Trimmed content of {filename} to {limit} characters.");
                 }
 
                 string key = Path.GetFileName(filename).Replace('.', '_');

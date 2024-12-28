@@ -30,7 +30,7 @@ var aoaiLlmConfiguration = new Configuration(
     Type: ConfigurationType.Llm,
     EnableAoai: true,
     ApiKeyEnvVar: "AOAI_API_KEY",
-    Url: "https://icanazopenai.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-10-21");
+    Url: "https://icanazopenai.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2024-10-21");
 
 var geminiEmbeddingConfiguration = new Configuration(
     Type: ConfigurationType.Embedding,
@@ -62,24 +62,26 @@ static void LogEnvironmentVariablesName(List<Configuration> configurations)
 
 LogEnvironmentVariablesName(configurations);
 
+string projectPath = Directory.GetCurrentDirectory();
+ProjectModel? project = ProjectLogic.ReadProjectJson(projectPath);
+
+if (project == null)
+{
+    projectPath = @"C:\B\L1\llmc\playground";
+    project = ProjectLogic.ReadProjectJson(@"C:\B\L1\llmc\playground")!;
+}
+
 var llmConnector = new LlmConnector(configurations);
 var promptDecorator = new PromptDecorator();
 var promptExtractor = new PromptExtractor();
 var executorFinder = new ExecutorFinder(llmConnector);
-var executorInvoker = new ExecutorInvoker(llmConnector);
+var executorInvoker = new ExecutorInvoker(project, llmConnector);
 var fileRedactor = new FileRedactor(llmConnector, executorInvoker);
-string projectPath = Directory.GetCurrentDirectory();
-var projectLogic = new ProjectLogic(projectPath, commandLineParams, llmConnector, promptDecorator, promptExtractor, executorFinder, executorInvoker, fileRedactor);
 
-var projectJson = projectLogic.ReadProjectJson(projectPath);
+var projectLogic = new ProjectLogic(projectPath, project, commandLineParams, llmConnector, promptDecorator, promptExtractor, executorFinder, executorInvoker, fileRedactor);
 
-if (projectJson == null)
-{
-    projectPath = @"C:\B\L1\llmc\playground";
-    projectJson = projectLogic.ReadProjectJson(@"C:\B\L1\llmc\playground");
-
-    projectLogic = new ProjectLogic(projectPath, commandLineParams, llmConnector, promptDecorator, promptExtractor, executorFinder, executorInvoker, fileRedactor);
-}
+// Validation.
+projectLogic.Validate();
 
 AppContext.SetSwitch("System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization", true);
 
