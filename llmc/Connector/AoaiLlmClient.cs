@@ -72,6 +72,11 @@ internal class AoaiLlmClient(Configuration configuration) : ILlmClient
             var responseObj = JsonConvert.DeserializeObject<AOAICompletionResult>(
                 responseContent);
 
+            if (!string.IsNullOrEmpty(responseObj?.Error?.Code))
+            {
+                throw new InvalidDataException($"Azure OpenAI error: {responseObj.Error.Code}:  {responseObj?.Error?.Message}");
+            }
+
             return responseObj?.Choices?[0]?.Message?.Content?.Trim() ?? string.Empty;
         }
 
@@ -92,6 +97,18 @@ internal class AOAICompletionResult
 {
     [JsonProperty("choices")]
     public List<Choice> Choices { get; set; } = new();
+
+    [JsonProperty("error")]
+    public ErrorType Error { get; set; } = new();
+
+    internal class ErrorType
+    {
+        [JsonProperty("code")]
+        public string Code { get; set; } = "";
+
+        [JsonProperty("message")]
+        public string Message { get; set; } = "";
+    }
 
     internal class Choice
     {

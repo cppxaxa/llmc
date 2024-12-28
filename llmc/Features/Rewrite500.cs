@@ -92,7 +92,10 @@ internal class Rewrite500 : FeatureCommon
                 fileIndexToUndoRedaction.Add(i);
 
                 string prompt = $"{fileModificationPrompt}{Environment.NewLine}" +
-                    $"Give the full raw content for file {fileNames[i]} after modification inside a markdown code annotation:{Environment.NewLine}";
+                    $"Request Id: {Guid.NewGuid()}{Environment.NewLine}" +
+                    $"Actual ask to AI Assistant: Give the full raw content for " +
+                    $"file {fileNames[i]} after modification inside a " +
+                    $"github code annotation:{Environment.NewLine}";
                 string newContent = Connector.Complete(prompt);
 
                 //string rawFileContent = GetRawFileContent(fileNames[i], newContent);
@@ -147,7 +150,8 @@ internal class Rewrite500 : FeatureCommon
             $"sample it is{Environment.NewLine}" +
             $"{html1}{Environment.NewLine}" +
             $"---{Environment.NewLine}" +
-            $"# Now, for the following actual conversation, respond back with the raw content of top level annotations only for file {filename}:{Environment.NewLine}" +
+            $"Request Id: {Guid.NewGuid()}{Environment.NewLine}" +
+            $"# Actual ask for AI Assistant: Now, for the following actual conversation, respond back with the raw content of top level annotations only for file {filename}:{Environment.NewLine}" +
             $"{Environment.NewLine}" +
             $"{contentToParse}{Environment.NewLine}" +
             $"---{Environment.NewLine}";
@@ -184,7 +188,8 @@ internal class Rewrite500 : FeatureCommon
     {
         EnsureThat.EnsureArg.IsNotNull(Connector, nameof(Connector));
 
-        string prompt = $"Return single word true or false. Based on the user ask on a file, " +
+        string prompt = $"Request Id: {Guid.NewGuid()}{Environment.NewLine}" +
+            $"Return single word true or false. Based on the user ask on a file, " +
             $"do you think that we should make changes to the file '{filename}' for user query?{Environment.NewLine}" +
             $"Ask on the file:{meta}{Environment.NewLine}" +
             $"AI answer: ";
@@ -198,7 +203,8 @@ internal class Rewrite500 : FeatureCommon
     {
         EnsureThat.EnsureArg.IsNotNull(Connector, nameof(Connector));
 
-        string prompt = $"Return single word true or false. Based on the user ask on a file, " +
+        string prompt = $"Request Id: {Guid.NewGuid()}{Environment.NewLine}" +
+            $"Return single word true or false. Based on the user ask on a file, " +
             $"do you think that we should read the file '{filename}' for reference while doing any operation?{Environment.NewLine}" +
             $"Ask on the file:{meta}{Environment.NewLine}" +
             $"AI answer: ";
@@ -213,19 +219,21 @@ internal class Rewrite500 : FeatureCommon
         EnsureThat.EnsureArg.IsNotNull(Connector, nameof(Connector));
         EnsureThat.EnsureArg.IsNotNull(Prompt, nameof(Prompt));
 
-        string prompt = $"# Based on the user prompt, " +
-            $"Check if the file content is relevant or not. If relevant, " +
-            $"Tell me any anything from file content that may be useful to answer user prompt/ " +
-            $"or tell if you suspect modifications required in the file for " +
-            $"serving our user prompt." +
-            $"You must answer as concisely as possible, " +
-            $"but completely understandable.{Environment.NewLine}" +
-            $"# Given,{Environment.NewLine}" +
+        string prompt = $"# Given,{Environment.NewLine}" +
             $"User prompt: {Prompt.Text}{Environment.NewLine}" +
             $"--------{Environment.NewLine}" +
             $"Filename: {file}{Environment.NewLine}" +
             $"Content:{Environment.NewLine}{Environment.NewLine}" +
-            $"{content}";
+            $"{content}{Environment.NewLine}" +
+            $"--------{Environment.NewLine}" +
+            $"Request Id: {Guid.NewGuid()}{Environment.NewLine}" +
+            $"Actual ask to AI assistant: Based on the user prompt, " +
+            $"Check if the file content is relevant or not. If relevant, " +
+            $"Tell me any anything from file content that may be useful to answer user prompt/ " +
+            $"or tell if you suspect modifications required in the file for " +
+            $"serving our user prompt. " +
+            $"You must answer as concisely as possible, " +
+            $"but completely understandable.{Environment.NewLine}";
 
         string result = Connector.Complete(prompt);
 
