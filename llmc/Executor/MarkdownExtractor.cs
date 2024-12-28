@@ -80,7 +80,7 @@ namespace llmc.Executor
             return undo.ToString();
         }
 
-        private List<string> ExtractSection(List<string> fileLines, int sectionIndex)
+        private static List<string> ExtractSection(List<string> fileLines, int sectionIndex)
         {
             List<string> sectionLines = [];
 
