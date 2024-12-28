@@ -60,7 +60,7 @@ internal class Rewrite100 : FeatureCommon
                 string content = File.ReadAllText(Path.Join(parentDirectory, fileNames[i]));
 
                 contentPrompt.AppendLine($"Filename: {fileNames[i]}{Environment.NewLine}");
-                contentPrompt.AppendLine($"Content:{Environment.NewLine}{content}{Environment.NewLine}");
+                contentPrompt.AppendLine($"Original file content before modification:{Environment.NewLine}{content}{Environment.NewLine}");
                 contentPrompt.AppendLine($"----{Environment.NewLine}");
             }
         }
@@ -81,10 +81,11 @@ internal class Rewrite100 : FeatureCommon
                 Console.WriteLine($"{nameof(Rewrite100)}:Rewriting file required: {fileNames[i]}");
 
                 string prompt = $"{fileModificationPrompt}{Environment.NewLine}" +
-                    $"Give the new content for file {fileNames[i]}:{Environment.NewLine}";
+                    $"Give the full raw content for file {fileNames[i]} after modification inside a markdown code annotation:{Environment.NewLine}";
                 string newContent = Connector.Complete(prompt);
 
-                string rawFileContent = GetRawFileContent(fileNames[i], newContent);
+                //string rawFileContent = GetRawFileContent(fileNames[i], newContent);
+                string rawFileContent = RemoveCodeAnnotation(newContent);
 
                 // Write the file.
                 File.WriteAllText(Path.Join(parentDirectory, fileNames[i]), rawFileContent);
