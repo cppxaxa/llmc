@@ -1,10 +1,12 @@
 # User query
-Tell me ad clicks for US market from device PC and it should be Shopping ad
+{{{chartquery}}}
 
 # Pool of json
+```jsonl
 {{{search-result_jsonl}}}
+```
 
-# Filtered json list
+# Filtered json list (Subset of pool of json)
 ```jsonl
 <TODO>
 ```
