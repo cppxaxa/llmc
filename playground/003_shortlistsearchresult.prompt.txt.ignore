@@ -3,11 +3,15 @@ Features:
 PreBuild:
 - DeleteFolder(folder="search-results-test")
 - CopyFolder(source="search-results",destination="search-results-test")
-- ProcessHandlebarsSyntax(folder="search-results-test",wildcard="*.md")
+- ApplyMacros(folder="search-results-test",wildcard="*.md")
+PostBuild:
+- MarkdownExtractor(input="search-results-test/README.md",output="search-results-test/filtered-dimensions.jsonl",sectionsearch="Filtered json",removecodeannotation="true")
+- ConsoleWriteline(filename="search-results-test/filtered-dimensions.jsonl")
 ---
 You are an intelligent natural language processor, powered by AI.
 I want you to fix the TODO in README.md with minimal changes.
 The filtered json are shortlisted json lines from pool of json mentioned in README.md
 based on the following user query
-"Tell me ad clicks for US market from device PC and it should be Shopping ad"
+"{{{chartquery}}}"
+The filtered json are exact subset of pool of json and remember to enclose with ```jsonl annotation.
 Give instructions to write README.md with new content.
