@@ -13,21 +13,23 @@ namespace llmc.Executor
     {
         public override string Execute(string parentDirectory, string param)
         {
+            EnsureThat.EnsureArg.IsNotNull(Storage);
+            
             StringBuilder undo = new();
 
             Dictionary<string, string> p = Common.ParseParam(param);
             string filename = p["filename"];
             string escapedString = p["escapedString"];
 
-            if (File.Exists(Path.Join(parentDirectory, filename)))
+            if (Storage.Exists(Path.Join(parentDirectory, filename)))
             {
                 string newFilename = filename + ".bak-" + Guid.NewGuid();
-                File.Move(Path.Join(parentDirectory, filename), Path.Join(parentDirectory, newFilename));
+                Storage.Move(Path.Join(parentDirectory, filename), Path.Join(parentDirectory, newFilename));
 
                 undo.AppendLine($"MoveFile(from=\"{newFilename}\",to=\"{filename}\")");
             }
 
-            File.WriteAllText(Path.Join(parentDirectory, filename), escapedString);
+            Storage.WriteAllText(Path.Join(parentDirectory, filename), escapedString);
 
             undo.AppendLine($"DeleteFile(filename=\"{filename}\")");
 

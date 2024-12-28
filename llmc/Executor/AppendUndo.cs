@@ -7,6 +7,8 @@ internal class AppendUndo : ExecutorCommon
 {
     public override string Execute(string parentDirectory, string param)
     {
+        EnsureThat.EnsureArg.IsNotNull(Storage);
+
         StringBuilder undo = new();
 
         string undoFilename = Path.Combine(parentDirectory, "undo.executor.txt");
@@ -16,7 +18,7 @@ internal class AppendUndo : ExecutorCommon
 
         if (dump != null)
         {
-            File.AppendAllLines(undoFilename, new[] { dump });
+            Storage.AppendAllLines(undoFilename, new[] { dump });
             return undo.ToString();
         }
         else
@@ -26,7 +28,7 @@ internal class AppendUndo : ExecutorCommon
             List<string> remainingParams = p.Where(e => e.Key != "fn")
                 .Select(e => $"{e.Key}=\"{e.Value}\"").ToList();
 
-            File.AppendAllLines(undoFilename, new[] {
+            Storage.AppendAllLines(undoFilename, new[] {
                 $"{source}({string.Join(',', remainingParams)})"
             });
         }

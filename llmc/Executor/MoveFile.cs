@@ -12,6 +12,8 @@ namespace llmc.Executor
     {
         public override string Execute(string parentDirectory, string param)
         {
+            EnsureThat.EnsureArg.IsNotNull(Storage);
+
             List<string> undo = [];
 
             Dictionary<string, string> p = Common.ParseParam(param);
@@ -22,19 +24,19 @@ namespace llmc.Executor
             if (!string.IsNullOrEmpty(from) || !string.IsNullOrEmpty(to))
             {
                 // Rename the file from "from" to "to"
-                if (System.IO.File.Exists(System.IO.Path.Join(parentDirectory, from)))
+                if (Storage.Exists(Path.Join(parentDirectory, from)))
                 {
-                    if (File.Exists(Path.Join(parentDirectory, to)))
+                    if (Storage.Exists(Path.Join(parentDirectory, to)))
                     {
                         string newFilename = to + ".bak-" + Guid.NewGuid();
-                        File.Move(Path.Join(parentDirectory, to), Path.Join(parentDirectory, newFilename));
+                        Storage.Move(Path.Join(parentDirectory, to), Path.Join(parentDirectory, newFilename));
 
                         undo.Insert(0, $"MoveFile(from=\"{newFilename}\",to=\"{to}\")");
                     }
 
-                    System.IO.File.Move(
-                        System.IO.Path.Join(parentDirectory, from),
-                        System.IO.Path.Join(parentDirectory, to));
+                    Storage.Move(
+                        Path.Join(parentDirectory, from),
+                        Path.Join(parentDirectory, to));
 
                     undo.Insert(0, $"MoveFile(from=\"{to}\",to=\"{from}\")");
                 }

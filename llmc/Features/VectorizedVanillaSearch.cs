@@ -15,6 +15,7 @@ internal class VectorizedVanillaSearch : FeatureCommon
 
         StringBuilder undo = new();
 
+        EnsureThat.EnsureArg.IsNotNull(Storage);
         EnsureThat.EnsureArg.IsNotNull(Connector, nameof(Connector));
         EnsureThat.EnsureArg.IsNotNull(Prompt, nameof(Prompt));
         EnsureThat.EnsureArg.IsNotNull(ExecutorInvoker, nameof(ExecutorInvoker));
@@ -36,9 +37,9 @@ internal class VectorizedVanillaSearch : FeatureCommon
         Prompt.Text = string.Empty;
 
         // Load the vectors from the source.
-        foreach (var f in Directory.GetFiles(Path.Combine(parentDirectory, source)))
+        foreach (var f in Storage.GetFiles(Path.Combine(parentDirectory, source)))
         {
-            foreach (var line in File.ReadAllLines(f))
+            foreach (var line in Storage.ReadAllLines(f))
             {
                 var vectorDocument = JsonConvert.DeserializeObject<VectorDocument>(line)
                     ?? throw new Exception("Error in parsing jsonl file");
@@ -64,12 +65,13 @@ internal class VectorizedVanillaSearch : FeatureCommon
             }
         }
 
-        if (File.Exists(outFilePath))
+        if (Storage.Exists(outFilePath))
         {
             string newFile = $"{file}.{Guid.NewGuid()}.bak";
 
-            res = ExecutorInvoker.Invoke(parentDirectory, new ExecutorFinderResult(
-                "MoveFile", $"from=\"{file}\",to=\"{newFile}\""));
+            res = ExecutorInvoker.Clone().ChangeStorage(Storage).Invoke(
+                parentDirectory,
+                new ExecutorFinderResult("MoveFile", $"from=\"{file}\",to=\"{newFile}\""));
 
             undo.AppendLine(res);
         }
@@ -80,15 +82,15 @@ internal class VectorizedVanillaSearch : FeatureCommon
 
         List<ExecutorFinderResult> appendUndoList = [];
 
-        if (!Directory.Exists(searchResultParentDirectory))
+        if (!Storage.Exists(searchResultParentDirectory))
         {
-            Directory.CreateDirectory(searchResultParentDirectory);
+            Storage.CreateDirectory(searchResultParentDirectory);
 
             appendUndoList.Add(new ExecutorFinderResult(
                 "AppendUndo", $"fn=\"DeleteFolder\",folder=\"{searchResultParentDirectory}\""));
         }
 
-        File.WriteAllText(outFilePath, string.Join(Environment.NewLine, searchResult));
+        Storage.WriteAllText(outFilePath, string.Join(Environment.NewLine, searchResult));
 
         appendUndoList.Add(new ExecutorFinderResult(
             "AppendUndo", $"fn=\"DeleteFile\",filename=\"{file}\""));
@@ -96,11 +98,13 @@ internal class VectorizedVanillaSearch : FeatureCommon
         // Add all undo.
         foreach (var appendUndoAction in appendUndoList)
         {
-            ExecutorInvoker.Invoke(parentDirectory, appendUndoAction);
+            ExecutorInvoker.Clone().ChangeStorage(Storage).Invoke(
+                parentDirectory, appendUndoAction);
         }
 
-        ExecutorInvoker.Invoke(parentDirectory, new ExecutorFinderResult(
-            "AppendUndo", $"dump={JsonConvert.SerializeObject(undo.ToString())}"));
+        ExecutorInvoker.Clone().ChangeStorage(Storage).Invoke(
+            parentDirectory, new ExecutorFinderResult(
+                "AppendUndo", $"dump={JsonConvert.SerializeObject(undo.ToString())}"));
     }
 
     private List<string> BreakPrompts(

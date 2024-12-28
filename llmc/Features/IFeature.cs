@@ -1,5 +1,6 @@
 ﻿using llmc.Connector;
 using llmc.Project;
+using llmc.Storage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,8 @@ internal interface IFeature
     FileRedactor? FileRedactor { get; set; }
 
     bool AsPrebuild { get; set; }
+
+    IStorage? Storage { get; set; }
 
     // Returns command to undo.
     void Execute(string parentDirectory, string param);

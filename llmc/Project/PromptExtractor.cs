@@ -1,4 +1,5 @@
 ﻿
+using llmc.Storage;
 using YamlDotNet.Serialization;
 
 namespace llmc.Project;
@@ -73,8 +74,31 @@ internal class PromptExtractor
             }
         }
 
+        // Parse flags.
+        HashSet<Flag> flags = new();
+
+        if (metadata.Flags != null)
+        {
+            foreach (string flagItem in metadata.Flags)
+            {
+                if (Enum.TryParse<Flag>(flagItem, out var flag))
+                {
+                    flags.Add(flag);
+                }
+                else
+                {
+                    Console.WriteLine($"PromptExtractor: Unknown flag {flagItem}");
+                }
+            }
+        }
+
+        // Create storage configuration.
+        StorageConfiguration storageConfiguration = new(
+            EnableInMemoryStorage: flags.Contains(Flag.EnableInMemoryStorage));
+
         return new Prompt(
             text: sections.LastOrDefault(string.Empty), metadataYaml: metadataYaml,
-            preBuild: preBuild, features: features, postBuild: postBuild, metadata: metadata);
+            preBuild: preBuild, features: features, postBuild: postBuild,
+            flags: flags, storageConfiguration: storageConfiguration, metadata: metadata);
     }
 }

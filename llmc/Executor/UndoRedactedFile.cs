@@ -13,6 +13,8 @@ internal class UndoRedactedFile : ExecutorCommon
 {
     public override string Execute(string parentDirectory, string param)
     {
+        EnsureThat.EnsureArg.IsNotNull(Storage);
+
         StringBuilder undo = new();
 
         Dictionary<string, string> p = Common.ParseParam(param);
@@ -20,17 +22,17 @@ internal class UndoRedactedFile : ExecutorCommon
 
         Console.WriteLine($"UndoRedactedFile:Redaction started on file {filename}.");
 
-        if (File.Exists(Path.Join(parentDirectory, filename)))
+        if (Storage.Exists(Path.Join(parentDirectory, filename)))
         {
             string directory = Path.GetDirectoryName(Path.Join(parentDirectory, filename))!;
             string finalFilename = Path.GetFileName(filename);
 
             // List all the redacted files.
-            string[] redactedFiles = Directory.GetFiles(directory, $"{finalFilename}.redacted-*");
+            string[] redactedFiles = Storage.GetFiles(directory, $"{finalFilename}.redacted-*");
 
             Console.WriteLine($"UndoRedactedFile:Found {redactedFiles.Length} redacted files.");
 
-            string content = File.ReadAllText(Path.Join(parentDirectory, filename));
+            string content = Storage.ReadAllText(Path.Join(parentDirectory, filename));
 
             foreach (var redactedFile in redactedFiles)
             {
@@ -38,18 +40,18 @@ internal class UndoRedactedFile : ExecutorCommon
                 string placeholder = $"[REDACTED ... {number}]";
 
                 string redactedContent = string.Join(
-                    Environment.NewLine, File.ReadAllLines(redactedFile));
+                    Environment.NewLine, Storage.ReadAllLines(redactedFile));
 
                 content = content.Replace(placeholder, redactedContent);
             }
 
-            File.WriteAllText(
+            Storage.WriteAllText(
                 Path.Join(parentDirectory, filename), content);
 
             // Delete all the redacted files.
             foreach (var redactedFile in redactedFiles)
             {
-                File.Delete(redactedFile);
+                Storage.Delete(redactedFile);
             }
         }
         else

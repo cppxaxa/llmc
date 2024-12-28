@@ -1,5 +1,7 @@
 Features:
 - Rewrite100(repo="search-results-test",wildcard="*.md")
+Flags:
+- EnableInMemoryStorage
 PreBuild:
 - DeleteFolder(folder="search-results-test")
 - CopyFolder(source="search-results",destination="search-results-test")

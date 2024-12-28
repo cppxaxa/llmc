@@ -14,6 +14,7 @@ internal class Rewrite500 : FeatureCommon
     {
         Console.WriteLine("Executing feature Rewrite500: " + param);
 
+        EnsureThat.EnsureArg.IsNotNull(Storage);
         EnsureThat.EnsureArg.IsNotNull(Connector, nameof(Connector));
         EnsureThat.EnsureArg.IsNotNull(Prompt, nameof(Prompt));
         EnsureThat.EnsureArg.IsNotNull(ExecutorFinder, nameof(ExecutorFinder));
@@ -28,10 +29,10 @@ internal class Rewrite500 : FeatureCommon
         List<string> fileNames = [];
         List<string> metaFileContents = [];
 
-        foreach (var file in Directory.EnumerateFiles(
+        foreach (var file in Storage.EnumerateFiles(
             Path.Combine(parentDirectory, repo), wildcard, SearchOption.AllDirectories))
         {
-            string content = File.ReadAllText(file);
+            string content = Storage.ReadAllText(file);
             
             fileNames.Add(file.Substring(Path.Combine(parentDirectory).Length));
             metaFileContents.Add(GetMetaFileContent(file, content));
@@ -42,7 +43,8 @@ internal class Rewrite500 : FeatureCommon
 
         for (int i = 0; i < fileNames.Count; i++)
         {
-            Console.WriteLine($"{nameof(Rewrite500)}:Reading meta: {fileNames[i]}::{metaFileContents[i]}");
+            Console.WriteLine($"{nameof(Rewrite500)}:Reading meta: " +
+                $"{fileNames[i]}::{metaFileContents[i]}");
 
             header.AppendLine($"Filename: {fileNames[i]}{Environment.NewLine}");
             header.AppendLine($"Modification request:{Environment.NewLine}{metaFileContents[i]}{Environment.NewLine}");
@@ -62,14 +64,17 @@ internal class Rewrite500 : FeatureCommon
                 Console.WriteLine($"{nameof(Rewrite500)}:Reading file required: {fileNames[i]}");
 
                 // Redact the file.
-                FileRedactor.RedactFile(parentDirectory, fileNames[i], Prompt);
+                FileRedactor.Clone().ChangeExecutorInvoker(
+                    ExecutorInvoker.Clone().ChangeStorage(Storage)).RedactFile(
+                    parentDirectory, fileNames[i], Prompt);
 
                 fileIndexToUndoRedaction.Add(i);
 
-                string content = File.ReadAllText(Path.Join(parentDirectory, fileNames[i]));
+                string content = Storage.ReadAllText(Path.Join(parentDirectory, fileNames[i]));
 
                 contentPrompt.AppendLine($"Filename: {fileNames[i]}{Environment.NewLine}");
-                contentPrompt.AppendLine($"Original file content before modification:{Environment.NewLine}{content}{Environment.NewLine}");
+                contentPrompt.AppendLine($"Original file content before modification:{Environment.NewLine}");
+                contentPrompt.AppendLine($"{content}{Environment.NewLine}");
                 contentPrompt.AppendLine($"----{Environment.NewLine}");
             }
         }
@@ -102,7 +107,7 @@ internal class Rewrite500 : FeatureCommon
                 string rawFileContent = RemoveCodeAnnotation(newContent);
 
                 // Write the file.
-                File.WriteAllText(Path.Join(parentDirectory, fileNames[i]), rawFileContent);
+                Storage.WriteAllText(Path.Join(parentDirectory, fileNames[i]), rawFileContent);
             }
         }
 
@@ -110,7 +115,9 @@ internal class Rewrite500 : FeatureCommon
         // Undo redaction.
         foreach (var i in fileIndexToUndoRedaction)
         {
-            FileRedactor.Undo(parentDirectory, fileNames[i]);
+            FileRedactor.Clone().ChangeExecutorInvoker(
+                ExecutorInvoker.Clone().ChangeStorage(Storage)).Undo(
+                parentDirectory, fileNames[i]);
         }
     }
 
@@ -138,8 +145,8 @@ internal class Rewrite500 : FeatureCommon
             $"```{Environment.NewLine}" +
             $"This concludes the html file contents that can help you greet with minimal changes.";
 
-        string promptPrefix = $"# Give me the raw file contents by extracting from a natural langauage " +
-            $"converation:{Environment.NewLine}" +
+        string promptPrefix = $"# Give me the raw file contents by extracting from a natural " +
+            $"langauage converation:{Environment.NewLine}" +
             $"{Environment.NewLine}";
 
         string prompt = promptPrefix +
@@ -151,7 +158,9 @@ internal class Rewrite500 : FeatureCommon
             $"{html1}{Environment.NewLine}" +
             $"---{Environment.NewLine}" +
             $"Request Id: {Guid.NewGuid()}{Environment.NewLine}" +
-            $"# Actual ask for AI Assistant: Now, for the following actual conversation, respond back with the raw content of top level annotations only for file {filename}:{Environment.NewLine}" +
+            $"# Actual ask for AI Assistant: Now, for the following actual conversation, " +
+            $"respond back with the raw content of top level annotations only for file " +
+            $"{filename}:{Environment.NewLine}" +
             $"{Environment.NewLine}" +
             $"{contentToParse}{Environment.NewLine}" +
             $"---{Environment.NewLine}";
@@ -190,7 +199,8 @@ internal class Rewrite500 : FeatureCommon
 
         string prompt = $"Request Id: {Guid.NewGuid()}{Environment.NewLine}" +
             $"Return single word true or false. Based on the user ask on a file, " +
-            $"do you think that we should make changes to the file '{filename}' for user query?{Environment.NewLine}" +
+            $"do you think that we should make changes to the file '{filename}' for user query?" +
+            $"{Environment.NewLine}" +
             $"Ask on the file:{meta}{Environment.NewLine}" +
             $"AI answer: ";
 
@@ -205,7 +215,8 @@ internal class Rewrite500 : FeatureCommon
 
         string prompt = $"Request Id: {Guid.NewGuid()}{Environment.NewLine}" +
             $"Return single word true or false. Based on the user ask on a file, " +
-            $"do you think that we should read the file '{filename}' for reference while doing any operation?{Environment.NewLine}" +
+            $"do you think that we should read the file '{filename}' for reference " +
+            $"while doing any operation?{Environment.NewLine}" +
             $"Ask on the file:{meta}{Environment.NewLine}" +
             $"AI answer: ";
 

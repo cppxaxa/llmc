@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace llmc.Project
@@ -37,6 +38,18 @@ namespace llmc.Project
             }
 
             return fileContent;
+        }
+
+        internal static bool IsWildcardMatch(string fileName, string wildcardPattern)
+        {
+            // Escape special regex characters in the pattern, then replace wildcards with regex equivalents
+            string regexPattern = "^" + Regex.Escape(wildcardPattern)
+                .Replace(@"\*", ".*")   // Replace '*' with '.*' (match zero or more characters)
+                .Replace(@"\?", ".")    // Replace '?' with '.' (match any single character)
+                + "$";
+
+            // Match the filename against the regex pattern
+            return Regex.IsMatch(fileName, regexPattern, RegexOptions.IgnoreCase);
         }
 
         internal static Dictionary<string, string> ParseParam(string param)

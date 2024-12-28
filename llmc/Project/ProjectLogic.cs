@@ -1,6 +1,7 @@
 ﻿using llmc.Connector;
 using llmc.Executor;
 using llmc.Features;
+using llmc.Storage;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ internal class ProjectLogic(
     string parentPath,
     ProjectModel project,
     CommandLineParams commandLineParams,
+    IStorage storage,
     LlmConnector connector,
     PromptDecorator promptDecorator,
     PromptExtractor promptExtractor,
@@ -42,7 +44,7 @@ internal class ProjectLogic(
     {
         List<string> prompts = [];
 
-        foreach (var file in Directory.GetFiles(parentPath))
+        foreach (var file in storage.GetFiles(parentPath))
         {
             if (file.EndsWith(".prompt.txt"))
             {
@@ -107,7 +109,9 @@ internal class ProjectLogic(
         {
             foreach (var preBuild in prompt.PreBuild)
             {
-                undo.Insert(0, executorInvoker.Invoke(parentPath, preBuild));
+                undo.Insert(0, executorInvoker.Clone().ChangeStorage(
+                    storage.Clone().ApplyConfiguration(prompt.StorageConfiguration))
+                    .Invoke(parentPath, preBuild));
             }
         }
 
@@ -125,7 +129,9 @@ internal class ProjectLogic(
         {
             foreach (var postBuild in prompt.PostBuild)
             {
-                undo.Insert(0, executorInvoker.Invoke(parentPath, postBuild));
+                undo.Insert(0, executorInvoker.Clone().ChangeStorage(
+                    storage.Clone().ApplyConfiguration(prompt.StorageConfiguration))
+                    .Invoke(parentPath, postBuild));
             }
         }
 
@@ -142,7 +148,9 @@ internal class ProjectLogic(
 
         foreach (var finderResult in finderResults)
         {
-            undo.Insert(0, executorInvoker.Invoke(parentPath, finderResult));
+            undo.Insert(0, executorInvoker.Clone().ChangeStorage(
+                storage.Clone().ApplyConfiguration(result.Prompt.StorageConfiguration))
+                .Invoke(parentPath, finderResult));
         }
 
         // Append to cleanup.
@@ -173,6 +181,7 @@ internal class ProjectLogic(
             feature.ExecutorFinder = executorFinder;
             feature.ExecutorInvoker = executorInvoker;
             feature.FileRedactor = fileRedactor;
+            feature.Storage = storage.Clone().ApplyConfiguration(prompt.StorageConfiguration);
 
             return feature;
         }
@@ -188,9 +197,9 @@ internal class ProjectLogic(
         return true;
     }
 
-    public static ProjectModel? ReadProjectJson(string directory)
+    public static ProjectModel? ReadProjectJson(IStorage storage, string directory)
     {
-        var projects = Directory.GetFiles(directory, "*.llmc.json");
+        var projects = storage.GetFiles(directory, "*.llmc.json");
 
         if (projects.Length == 1)
         {

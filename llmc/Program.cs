@@ -1,6 +1,7 @@
 ﻿
 using llmc.Connector;
 using llmc.Project;
+using llmc.Storage;
 
 if (args.Length == 1 && (args[0] == "--help" || args[0] == "-h" || args[0] == "/?"))
 {
@@ -17,8 +18,9 @@ if (args.Length == 1 && (args[0] == "--help" || args[0] == "-h" || args[0] == "/
 
 // Commandline parameters.
 bool noUndo = args.Contains("--noundo");
+bool forceLocalStorage = args.Contains("--forcelocalstorage");
 
-CommandLineParams commandLineParams = new(NoUndo: noUndo);
+CommandLineParams commandLineParams = new(NoUndo: noUndo, ForceLocalStorage: forceLocalStorage);
 
 var geminiLlmConfiguration = new Configuration(
     Type: ConfigurationType.Llm,
@@ -62,23 +64,27 @@ static void LogEnvironmentVariablesName(List<Configuration> configurations)
 
 LogEnvironmentVariablesName(configurations);
 
+// Default behavior.
+var storage = new SwitchableStorage(new(
+    EnableInMemoryStorage: false));
+
 string projectPath = Directory.GetCurrentDirectory();
-ProjectModel? project = ProjectLogic.ReadProjectJson(projectPath);
+ProjectModel? project = ProjectLogic.ReadProjectJson(storage, projectPath);
 
 if (project == null)
 {
     projectPath = @"C:\B\L1\llmc\playground";
-    project = ProjectLogic.ReadProjectJson(@"C:\B\L1\llmc\playground")!;
+    project = ProjectLogic.ReadProjectJson(storage, @"C:\B\L1\llmc\playground")!;
 }
 
 var llmConnector = new LlmConnector(configurations);
 var promptDecorator = new PromptDecorator();
 var promptExtractor = new PromptExtractor();
 var executorFinder = new ExecutorFinder(llmConnector);
-var executorInvoker = new ExecutorInvoker(project, llmConnector);
+var executorInvoker = new ExecutorInvoker(project, storage, llmConnector);
 var fileRedactor = new FileRedactor(llmConnector, executorInvoker);
 
-var projectLogic = new ProjectLogic(projectPath, project, commandLineParams, llmConnector, promptDecorator, promptExtractor, executorFinder, executorInvoker, fileRedactor);
+var projectLogic = new ProjectLogic(projectPath, project, commandLineParams, storage, llmConnector, promptDecorator, promptExtractor, executorFinder, executorInvoker, fileRedactor);
 
 // Validation.
 projectLogic.Validate();
@@ -120,13 +126,13 @@ foreach (var prompt in prompts)
 
     if (!commandLineParams.NoUndo)
     {
-        if (File.Exists(Path.Join(projectPath, "undo.executor.txt")))
+        if (storage.Exists(Path.Join(projectPath, "undo.executor.txt")))
         {
-            undoContent = File.ReadAllText(
+            undoContent = storage.ReadAllText(
                 Path.Join(projectPath, "undo.executor.txt")) +
                 Environment.NewLine + undoContent;
         }
 
-        File.WriteAllText(Path.Join(projectPath, "undo.executor.txt"), undoContent);
+        storage.WriteAllText(Path.Join(projectPath, "undo.executor.txt"), undoContent);
     }
 }

@@ -13,6 +13,8 @@ namespace llmc.Executor
     {
         public override string Execute(string parentDirectory, string param)
         {
+            EnsureThat.EnsureArg.IsNotNull(Storage);
+
             StringBuilder undo = new();
 
             Dictionary<string, string> p = Common.ParseParam(param);
@@ -24,23 +26,24 @@ namespace llmc.Executor
             string inputFileFullPath = Path.Join(parentDirectory, input);
             string outputFileFullPath = Path.Join(parentDirectory, output);
 
-            if (File.Exists(outputFileFullPath))
+            if (Storage.Exists(outputFileFullPath))
             {
                 string newFilename = outputFileFullPath + ".bak-" + Guid.NewGuid();
-                File.Move(outputFileFullPath, newFilename);
+                Storage.Move(outputFileFullPath, newFilename);
 
                 undo.AppendLine($"MoveFile(from=\"{newFilename}\",to=\"{output}\")");
             }
 
             // TODO. Implement the logic to extract the markdown content.
             // Read the input file line by line.
-            List<string> fileLines = File.ReadAllLines(inputFileFullPath).ToList();
+            List<string> fileLines = Storage.ReadAllLines(inputFileFullPath).ToList();
             int sectionIndex = fileLines.FindIndex(line => line.Trim().StartsWith('#') &&
                 line.Contains(sectionsearch));
 
             if (sectionIndex == -1)
             {
-                Console.WriteLine($"MarkdownExtractor: Section '{sectionsearch}' not found in the input file '{inputFileFullPath}'.");
+                Console.WriteLine($"MarkdownExtractor: Section '{sectionsearch}' " +
+                    $"not found in the input file '{inputFileFullPath}'.");
 
                 return undo.ToString();
             }
@@ -72,7 +75,7 @@ namespace llmc.Executor
                 }
             }
 
-            File.WriteAllLines(outputFileFullPath, codesection);
+            Storage.WriteAllLines(outputFileFullPath, codesection);
             Console.WriteLine($"MarkdownExtractor: Extracted the code section '{sectionsearch}' from '{inputFileFullPath}' to '{outputFileFullPath}'");
 
             undo.AppendLine($"DeleteFile(filename=\"{outputFileFullPath}\")");

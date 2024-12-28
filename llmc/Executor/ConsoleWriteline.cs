@@ -13,6 +13,8 @@ namespace llmc.Executor
     {
         public override string Execute(string parentDirectory, string param)
         {
+            EnsureThat.EnsureArg.IsNotNull(Storage);
+
             StringBuilder undo = new();
 
             Dictionary<string, string> p = Common.ParseParam(param);
@@ -22,12 +24,12 @@ namespace llmc.Executor
             Console.WriteLine($"## {nameof(ConsoleWriteline)}");
             Console.WriteLine($"## Filename:{filename}");
             Console.WriteLine($"## FullPath:{fullPath}");
-            Console.WriteLine($"## Exists:{File.Exists(fullPath)}");
+            Console.WriteLine($"## Exists:{Storage.Exists(fullPath)}");
 
-            if (File.Exists(fullPath))
+            if (Storage.Exists(fullPath))
             {
                 Console.WriteLine($"<content>");
-                Console.WriteLine(File.ReadAllText(fullPath));
+                Console.WriteLine(Storage.ReadAllText(fullPath));
                 Console.WriteLine($"</content>");
             }
 

@@ -18,6 +18,7 @@ namespace llmc.Executor
         /// </summary>
         public override string Execute(string parentDirectory, string param)
         {
+            EnsureThat.EnsureArg.IsNotNull(Storage);
             EnsureThat.EnsureArg.IsNotNull(Project, nameof(Project));
 
             StringBuilder undo = new();
@@ -28,25 +29,25 @@ namespace llmc.Executor
 
             string inputFolder = Path.Join(parentDirectory, folder);
 
-            foreach (var filename in Directory.EnumerateFiles(inputFolder, wildcard))
+            foreach (var filename in Storage.EnumerateFiles(inputFolder, wildcard))
             {
                 string originalContent = string.Empty;
 
-                if (File.Exists(filename))
+                if (Storage.Exists(filename))
                 {
-                    originalContent = File.ReadAllText(filename);
+                    originalContent = Storage.ReadAllText(filename);
 
                     originalContent = Common.ApplyProjectMacros(Project, originalContent);
 
                     string newFilename = filename + ".bak-" + Guid.NewGuid();
-                    File.Move(filename, newFilename);
+                    Storage.Move(filename, newFilename);
 
                     undo.AppendLine($"MoveFile(from=\"{newFilename}\",to=\"{filename}\")");
                 }
 
                 string content = GetRenderedContent(originalContent, inputFolder);
 
-                File.WriteAllText(filename, content);
+                Storage.WriteAllText(filename, content);
 
                 undo.AppendLine($"DeleteFile(filename=\"{filename}\")");
             }
@@ -54,16 +55,18 @@ namespace llmc.Executor
             return undo.ToString();
         }
 
-        private static string GetRenderedContent(string templateContent, string templateFolder)
+        private string GetRenderedContent(string templateContent, string templateFolder)
         {
+            EnsureThat.EnsureArg.IsNotNull(Storage);
+
             var template = Handlebars.Compile(templateContent);
 
             var data = new Dictionary<string, string>();
 
             // Populate each file content.
-            foreach (var filename in Directory.EnumerateFiles(templateFolder))
+            foreach (var filename in Storage.EnumerateFiles(templateFolder))
             {
-                string content = File.ReadAllText(filename);
+                string content = Storage.ReadAllText(filename);
 
                 // Trim the content.
                 int limit = 15000;

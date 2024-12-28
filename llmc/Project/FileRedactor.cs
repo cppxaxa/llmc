@@ -10,8 +10,21 @@ namespace llmc.Project;
 
 internal class FileRedactor(
     LlmConnector connector,
-    ExecutorInvoker executorInvoker)
+    ExecutorInvoker _executorInvoker)
 {
+    private ExecutorInvoker executorInvoker = _executorInvoker;
+
+    public FileRedactor Clone()
+    {
+        return new FileRedactor(connector: connector, _executorInvoker: executorInvoker);
+    }
+
+    public FileRedactor ChangeExecutorInvoker(ExecutorInvoker _executorInvoker)
+    {
+        executorInvoker = _executorInvoker;
+        return this;
+    }
+
     public void RedactFile(string parentDirectory, string filename, Prompt prompt)
     {
         Console.WriteLine($"FileRedactor:Redacting file {filename}");

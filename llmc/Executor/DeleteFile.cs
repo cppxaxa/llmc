@@ -13,14 +13,16 @@ namespace llmc.Executor
     {
         public override string Execute(string parentDirectory, string param)
         {
+            EnsureThat.EnsureArg.IsNotNull(Storage);
+
             StringBuilder undo = new();
 
             Dictionary<string, string> p = Common.ParseParam(param);
             string filename = p["filename"];
 
-            if (File.Exists(Path.Join(parentDirectory, filename)))
+            if (Storage.Exists(Path.Join(parentDirectory, filename)))
             {
-                File.Delete(Path.Join(parentDirectory, filename));
+                Storage.Delete(Path.Join(parentDirectory, filename));
             }
 
             return undo.ToString();

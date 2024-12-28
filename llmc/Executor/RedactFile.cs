@@ -13,6 +13,8 @@ internal class RedactFile : ExecutorCommon
 {
     public override string Execute(string parentDirectory, string param)
     {
+        EnsureThat.EnsureArg.IsNotNull(Storage);
+
         StringBuilder undo = new();
 
         Dictionary<string, string> p = Common.ParseParam(param);
@@ -22,9 +24,9 @@ internal class RedactFile : ExecutorCommon
         Console.WriteLine($"RedactFile:Redaction started on file {filename} in " +
             $"{lines.Count} parts.");
 
-        if (File.Exists(Path.Join(parentDirectory, filename)))
+        if (Storage.Exists(Path.Join(parentDirectory, filename)))
         {
-            string[] fileLines = File.ReadAllLines(Path.Join(parentDirectory, filename));
+            string[] fileLines = Storage.ReadAllLines(Path.Join(parentDirectory, filename));
 
             int c = 1;
 
@@ -46,8 +48,8 @@ internal class RedactFile : ExecutorCommon
                 // Form redacted content filename.
                 string redactedFilename = filename + $".redacted-{c}";
 
-                // Write redacted content to a new file.
-                File.WriteAllLines(
+                // Write redacted content to a new Storage.
+                Storage.WriteAllLines(
                     Path.Join(parentDirectory, redactedFilename),
                     strings);
 
@@ -71,7 +73,7 @@ internal class RedactFile : ExecutorCommon
                 }
             }
 
-            File.WriteAllText(
+            Storage.WriteAllText(
                 Path.Join(parentDirectory, filename),
                 string.Join(Environment.NewLine, fileLines[0..(idx+1)]));
 

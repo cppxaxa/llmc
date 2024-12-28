@@ -14,6 +14,8 @@ namespace llmc.Executor
     {
         public override string Execute(string parentDirectory, string param)
         {
+            EnsureThat.EnsureArg.IsNotNull(Storage);
+
             Dictionary<string, string> p = Common.ParseParam(param);
 
             string? filename = p.ContainsKey("filename") ? p["filename"] : null;
@@ -28,7 +30,7 @@ namespace llmc.Executor
 
                 if (!string.IsNullOrEmpty(filename))
                 {
-                    code = File.ReadAllText(Path.Join(parentDirectory, filename), Encoding.UTF8);
+                    code = Storage.ReadAllText(Path.Join(parentDirectory, filename), Encoding.UTF8);
                 }
                 else if (!string.IsNullOrEmpty(pythonCode))
                 {

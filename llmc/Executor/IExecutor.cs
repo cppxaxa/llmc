@@ -1,5 +1,6 @@
 ﻿using llmc.Connector;
 using llmc.Project;
+using llmc.Storage;
 
 namespace llmc.Executor
 {
@@ -7,6 +8,7 @@ namespace llmc.Executor
     {
         ProjectModel? Project { get; set; }
         LlmConnector? Connector { get; set; }
+        IStorage? Storage { get; set; }
 
         // Returns command to undo.
         string Execute(string parentDirectory, string param);

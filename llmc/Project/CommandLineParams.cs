@@ -1,3 +1,3 @@
 ﻿namespace llmc.Project;
 
-internal record CommandLineParams(bool NoUndo);
+internal record CommandLineParams(bool NoUndo, bool ForceLocalStorage);

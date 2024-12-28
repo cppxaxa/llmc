@@ -11,6 +11,7 @@ internal class VectorizeVanilla : ExecutorCommon
     {
         StringBuilder undo = new();
 
+        EnsureThat.EnsureArg.IsNotNull(Storage);
         EnsureThat.EnsureArg.IsNotNull(Connector, nameof(Connector));
 
         Dictionary<string, string> p = Common.ParseParam(param);
@@ -20,20 +21,20 @@ internal class VectorizeVanilla : ExecutorCommon
 
         string fullOutFolder = Path.Combine(parentDirectory, outFolder);
 
-        if (!Directory.Exists(fullOutFolder))
+        if (!Storage.Exists(fullOutFolder))
         {
-            Directory.CreateDirectory(fullOutFolder);
+            Storage.CreateDirectory(fullOutFolder);
         }
 
         // Read all the jsonl files.
-        var files = Directory.GetFiles(Path.Combine(parentDirectory, jsonlfolder), "*.jsonl");
+        var files = Storage.GetFiles(Path.Combine(parentDirectory, jsonlfolder), "*.jsonl");
 
         List<VectorDocument> vectorDocuments = [];
         int flushCounter = 0;
 
         foreach (var f in files)
         {
-            var lines = File.ReadAllLines(f);
+            var lines = Storage.ReadAllLines(f);
 
             foreach (var l in lines)
             {
@@ -54,7 +55,7 @@ internal class VectorizeVanilla : ExecutorCommon
                 // Out.
                 vectorDocuments.Add(new VectorDocument(l, embedding));
 
-                // Write the embedding to a file.
+                // Write the embedding to a Storage.
                 if (vectorDocuments.Count > 50)
                 {
                     AppendVectors(fullOutFolder, vectorDocuments, flushCounter);
@@ -74,11 +75,13 @@ internal class VectorizeVanilla : ExecutorCommon
         return undo.ToString();
     }
 
-    private static void AppendVectors(string fullOutFolder, List<VectorDocument> vectorDocuments, int flushCounter)
+    private void AppendVectors(string fullOutFolder, List<VectorDocument> vectorDocuments, int flushCounter)
     {
+        EnsureThat.EnsureArg.IsNotNull(Storage);
+        
         string filename = Path.Combine(fullOutFolder, $"embedding-{flushCounter}.jsonl");
         List<string> outLines = vectorDocuments.Select(JsonConvert.SerializeObject).ToList();
-        File.AppendAllLines(filename, outLines);
+        Storage.AppendAllLines(filename, outLines);
     }
 
     internal record VectorDocument(string jsonLine, float[] embedding);
