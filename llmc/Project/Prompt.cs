@@ -10,7 +10,7 @@ public class Prompt
     public List<ExecutorFinderResult> Features { get; init; }
     public List<ExecutorFinderResult> PostBuild { get; init; }
     public HashSet<Flag> Flags { get; init; }
-    public StorageConfiguration StorageConfiguration { get; init; }
+    public StorageConfiguration StorageConfiguration { get; set; }
     public Metadata Metadata { get; init; }
 
     public Prompt(

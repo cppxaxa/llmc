@@ -12,7 +12,7 @@ if (args.Length == 1 && (args[0] == "--help" || args[0] == "-h" || args[0] == "/
     Console.WriteLine("Commandline parameters:");
     Console.WriteLine("llmc.exe --help | -h | /? : Display this help message");
     Console.WriteLine("llmc.exe --noundo : Do not generate undo.executor.txt file");
-    Console.WriteLine("llmc.exe --forcelocalstorage : Force to use local storage instead of cloud storage");
+    Console.WriteLine("llmc.exe --disableinmemorystorage : Disable in-memory storage flag");
     Console.WriteLine("llmc.exe --azurellm : Use Azure LLM");
     Console.WriteLine("llmc.exe --azureembedding : Use Azure Embedding");
     Console.WriteLine("llmc.exe --geminillm : Use Gemini LLM");
@@ -23,13 +23,13 @@ if (args.Length == 1 && (args[0] == "--help" || args[0] == "-h" || args[0] == "/
 
 // Commandline parameters.
 bool noUndo = args.Contains("--noundo");
-bool forceLocalStorage = args.Contains("--forcelocalstorage");
+bool disableInMemoryStorage = args.Contains("--disableinmemorystorage");
 bool azureLlm = args.Contains("--azurellm");
 bool azureEmbedding = args.Contains("--azureembedding");
 bool geminiLlm = args.Contains("--geminillm");
 bool geminiEmbedding = args.Contains("--geminiembedding");
 
-CommandLineParams commandLineParams = new(NoUndo: noUndo, ForceLocalStorage: forceLocalStorage);
+CommandLineParams commandLineParams = new(NoUndo: noUndo);
 
 var geminiLlmConfiguration = new Configuration(
     Type: ConfigurationType.Llm,
@@ -125,7 +125,7 @@ if (projectLogic.CheckForCleanup(projectPath))
     return;
 }
 
-var prompts = projectLogic.ReadPrompts();
+var prompts = projectLogic.ReadPrompts(disableInMemoryStorage: disableInMemoryStorage);
 
 // Handle each prompt separately.
 foreach (var prompt in prompts)

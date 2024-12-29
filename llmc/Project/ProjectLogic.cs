@@ -40,7 +40,7 @@ internal class ProjectLogic(
         }
     }
 
-    public List<Prompt> ReadPrompts()
+    public List<Prompt> ReadPrompts(bool disableInMemoryStorage)
     {
         List<string> prompts = [];
 
@@ -62,7 +62,18 @@ internal class ProjectLogic(
             Console.WriteLine("No prompts found in the project directory");
         }
 
-        return prompts.Select(promptExtractor.Extract).ToList();
+        return prompts.Select(promptExtractor.Extract)
+            .Select(e =>
+            {
+                if (disableInMemoryStorage)
+                {
+                    e.Flags.Remove(Flag.EnableInMemoryStorage);
+                    e.Metadata.Flags.Remove(Flag.EnableInMemoryStorage.ToString());
+                    e.StorageConfiguration = new(EnableInMemoryStorage: false);
+                }
+
+                return e;
+            }).ToList();
     }
 
     public List<LlmResult> GetLlmResults(List<Prompt> prompts)
