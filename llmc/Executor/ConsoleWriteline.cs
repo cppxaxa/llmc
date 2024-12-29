@@ -21,17 +21,16 @@ namespace llmc.Executor
             string filename = p["filename"];
             string fullPath = Path.Join(parentDirectory, filename);
 
-            Console.WriteLine($"## {nameof(ConsoleWriteline)}");
-            Console.WriteLine($"## Filename:{filename}");
+            Console.WriteLine($"<consolewriteline>");
             Console.WriteLine($"## FullPath:{fullPath}");
             Console.WriteLine($"## Exists:{Storage.Exists(fullPath)}");
 
             if (Storage.Exists(fullPath))
             {
-                Console.WriteLine($"<content>");
                 Console.WriteLine(Storage.ReadAllText(fullPath));
-                Console.WriteLine($"</content>");
             }
+
+            Console.WriteLine($"</consolewriteline>");
 
             return undo.ToString();
         }

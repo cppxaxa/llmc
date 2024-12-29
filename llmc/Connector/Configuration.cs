@@ -5,7 +5,8 @@ internal record Configuration(
     bool EnableAoai = false, bool EnableGemini = false,
     string GeminiUrlEnvVar = "", string Url = "",
     string GeminiEmbeddingUrl = "",
-    string AzureAoaiUrlEnvVar = "");
+    string AzureAoaiUrlEnvVar = "",
+    bool EnableStdStream = false);
 
 internal enum ConfigurationType
 {

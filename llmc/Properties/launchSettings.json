@@ -1,0 +1,15 @@
+{
+  "profiles": {
+    "llmc": {
+      "commandName": "Project"
+    },
+    "llmc azure": {
+      "commandName": "Project",
+      "commandLineArgs": "--azurellm --azureembedding"
+    },
+    "llmc gemini": {
+      "commandName": "Project",
+      "commandLineArgs": "--geminillm --geminiembedding"
+    }
+  }
+}

@@ -1,4 +1,6 @@
 Features:
-- VectorizedVanillaSearch(source="dimensionsvector",nresults="5",file="search-results/search-result.jsonl",slidingwordsize="4",slidingwordoverlap="2")
+- VectorizedVanillaSearch(source="dimensionsvector",nresults="5",file="dimensions-search/search-result.jsonl",slidingwordsize="4",slidingwordoverlap="2")
+Flags:
+- EnableInMemoryStorage
 ---
-Tell me ad clicks for US market from device PC and it should be Shopping ad
+{{{chartquery}}}

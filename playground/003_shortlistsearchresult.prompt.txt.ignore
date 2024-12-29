@@ -4,7 +4,7 @@ Flags:
 - EnableInMemoryStorage
 PreBuild:
 - DeleteFolder(folder="search-results-test")
-- CopyFolder(source="search-results",destination="search-results-test")
+- CopyFolder(source="dimensions-search",destination="search-results-test")
 - ApplyMacros(folder="search-results-test",wildcard="*.md")
 PostBuild:
 - MarkdownExtractor(input="search-results-test/README.md",output="search-results-test/filtered-dimensions.jsonl",sectionsearch="Filtered json",removecodeannotation="true")

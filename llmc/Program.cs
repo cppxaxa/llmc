@@ -12,6 +12,11 @@ if (args.Length == 1 && (args[0] == "--help" || args[0] == "-h" || args[0] == "/
     Console.WriteLine("Commandline parameters:");
     Console.WriteLine("llmc.exe --help | -h | /? : Display this help message");
     Console.WriteLine("llmc.exe --noundo : Do not generate undo.executor.txt file");
+    Console.WriteLine("llmc.exe --forcelocalstorage : Force to use local storage instead of cloud storage");
+    Console.WriteLine("llmc.exe --azurellm : Use Azure LLM");
+    Console.WriteLine("llmc.exe --azureembedding : Use Azure Embedding");
+    Console.WriteLine("llmc.exe --geminillm : Use Gemini LLM");
+    Console.WriteLine("llmc.exe --geminiembedding : Use Gemini Embedding");
 
     return;
 }
@@ -19,6 +24,10 @@ if (args.Length == 1 && (args[0] == "--help" || args[0] == "-h" || args[0] == "/
 // Commandline parameters.
 bool noUndo = args.Contains("--noundo");
 bool forceLocalStorage = args.Contains("--forcelocalstorage");
+bool azureLlm = args.Contains("--azurellm");
+bool azureEmbedding = args.Contains("--azureembedding");
+bool geminiLlm = args.Contains("--geminillm");
+bool geminiEmbedding = args.Contains("--geminiembedding");
 
 CommandLineParams commandLineParams = new(NoUndo: noUndo, ForceLocalStorage: forceLocalStorage);
 
@@ -46,23 +55,41 @@ var aoaiEmbeddingConfiguration = new Configuration(
     ApiKeyEnvVar: "AOAI_API_KEY",
     Url: "https://icanazopenai.openai.azure.com/openai/deployments/text-embedding-ada-002/embeddings?api-version=2023-05-15");
 
+// Production.
+var stdStreamLlmConfiguration = new Configuration(Type: ConfigurationType.Llm, EnableStdStream: true);
+
+// Production.
+var stdStreamEmbeddingConfiguration = new Configuration(Type: ConfigurationType.Embedding, EnableStdStream: true);
+
 List<Configuration> configurations = [
+    stdStreamLlmConfiguration,
+    stdStreamEmbeddingConfiguration,
     aoaiLlmConfiguration,
-    geminiLlmConfiguration,
     aoaiEmbeddingConfiguration,
-    geminiEmbeddingConfiguration
+    geminiLlmConfiguration,
+    geminiEmbeddingConfiguration,
 ];
 
-static void LogEnvironmentVariablesName(List<Configuration> configurations)
+if (azureLlm) configurations.Insert(0, aoaiLlmConfiguration);
+if (azureEmbedding) configurations.Insert(0, aoaiEmbeddingConfiguration);
+if (geminiLlm) configurations.Insert(0, geminiLlmConfiguration);
+if (geminiEmbedding) configurations.Insert(0, geminiEmbeddingConfiguration);
+
+void LogEnvironmentVariablesName()
 {
     foreach (var configuration in configurations)
     {
         Console.WriteLine($"ApiKeyEnvVar: {configuration.ApiKeyEnvVar}");
         Console.WriteLine($"GeminiUrlEnvVar: {configuration.GeminiUrlEnvVar}");
     }
+
+    if (azureLlm) Console.WriteLine("Switch: --azurellm");
+    if (azureEmbedding) Console.WriteLine("Switch: --azureembedding");
+    if (geminiLlm) Console.WriteLine("Switch: --geminillm");
+    if (geminiEmbedding) Console.WriteLine("Switch: --geminiembedding");
 }
 
-LogEnvironmentVariablesName(configurations);
+LogEnvironmentVariablesName();
 
 // Default behavior.
 var storage = new SwitchableStorage(new(
@@ -136,3 +163,10 @@ foreach (var prompt in prompts)
         storage.WriteAllText(Path.Join(projectPath, "undo.executor.txt"), undoContent);
     }
 }
+
+/* TODO:
+ * [ ] Force local instead of inmem
+ * [ ] C# library integrator 
+ * [ ] Project json from stdin
+ * [ ] Make prompts for presets
+ */

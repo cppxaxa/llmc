@@ -22,9 +22,14 @@ internal class LlmConnector(List<Configuration> configurations)
         if (!configurationCache.ContainsKey(ConfigurationType.Llm))
             configurationCache.Add(
                 ConfigurationType.Llm,
-                configurations.First(e => e.Type == ConfigurationType.Llm));
+                configurations
+                .First(e => e.Type == ConfigurationType.Llm));
 
-        if (configurationCache[ConfigurationType.Llm].EnableGemini)
+        if (configurationCache[ConfigurationType.Llm].EnableStdStream)
+        {
+            return new StdStreamLlmClient();
+        }
+        else if (configurationCache[ConfigurationType.Llm].EnableGemini)
         {
             return new GeminiLlmClient(configurationCache[ConfigurationType.Llm]);
         }
@@ -39,9 +44,14 @@ internal class LlmConnector(List<Configuration> configurations)
         if (!configurationCache.ContainsKey(ConfigurationType.Embedding))
             configurationCache.Add(
                 ConfigurationType.Embedding,
-                configurations.First(e => e.Type == ConfigurationType.Embedding));
+                configurations
+                .First(e => e.Type == ConfigurationType.Embedding));
 
-        if (configurationCache[ConfigurationType.Embedding].EnableGemini)
+        if (configurationCache[ConfigurationType.Embedding].EnableStdStream)
+        {
+            return new StdStreamEmbeddingClient();
+        }
+        else if (configurationCache[ConfigurationType.Embedding].EnableGemini)
         {
             return new GeminiEmbeddingClient(
                 configurationCache[ConfigurationType.Embedding]);
