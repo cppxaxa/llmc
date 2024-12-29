@@ -35,14 +35,8 @@
 *.suo
 *.log
 /playground/dimensionsdata_real
-/playground/index_gemini.html
 /playground/undo.executor.txt
-/playground/gui-detection.py
-/playground/file-browser.html
-/playground/index_aoai_gpt4o.html
 /playground/somedatavector_gemini
 /playground/somedatavector
-/playground/insert-query
-/playground/gui-snaps-small
-/playground/gui-snaps
 /playground/dimensionsvector_real
+/playground/stuffs
