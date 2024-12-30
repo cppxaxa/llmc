@@ -83,7 +83,6 @@ internal class ProjectLogic(
         foreach (var prompt in prompts)
         {
             string promptString = promptDecorator.Decorate(prompt.Text);
-            PreProcess(prompt, promptString);
             
             string result = string.Empty;
             if (!string.IsNullOrWhiteSpace(promptString))

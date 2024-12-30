@@ -134,7 +134,11 @@ foreach (var prompt in prompts)
 
     projectLogic.ProcessPrebuildFeatures(unitPrompts);
 
-    var llmResults = projectLogic.GetLlmResults(unitPrompts);
+    foreach (var unitPrompt in unitPrompts)
+    {
+        string promptString = promptDecorator.Decorate(unitPrompt.Text);
+        projectLogic.PreProcess(prompt, promptString);
+    }
 
     var processFeatures = projectLogic.ProcessNonPrebuildFeatures(unitPrompts);
 
@@ -142,6 +146,8 @@ foreach (var prompt in prompts)
 
     if (!processFeatures.AnyFeatureProcessed)
     {
+        var llmResults = projectLogic.GetLlmResults(unitPrompts);
+
         undoContent = projectLogic.Process(llmResults);
     }
 
@@ -165,7 +171,6 @@ foreach (var prompt in prompts)
 }
 
 /* TODO:
- * [ ] Force local instead of inmem
  * [ ] C# library integrator 
  * [ ] Project json from stdin
  * [ ] Make prompts for presets

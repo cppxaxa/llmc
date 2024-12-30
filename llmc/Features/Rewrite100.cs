@@ -27,6 +27,10 @@ internal class Rewrite100 : FeatureCommon
         // Enquire about the files.
         List<string> fileNames = [];
         List<string> metaFileContents = [];
+        string promptText = Prompt.Text;
+
+        // Clean the prompt text to avoid further consumption.
+        Prompt.Text = string.Empty;
 
         foreach (var file in Storage.EnumerateFiles(
             Path.Combine(parentDirectory, repo), wildcard, SearchOption.AllDirectories))
@@ -34,7 +38,7 @@ internal class Rewrite100 : FeatureCommon
             string content = Storage.ReadAllText(file);
             
             fileNames.Add(file.Substring(Path.Combine(parentDirectory).Length));
-            metaFileContents.Add(GetMetaFileContent(file, content));
+            metaFileContents.Add(GetMetaFileContent(promptText, file, content));
         }
 
         // Form header prompt with file info.
@@ -71,7 +75,7 @@ internal class Rewrite100 : FeatureCommon
         // Form the final prompt.
         StringBuilder fileModificationPrompt = new();
 
-        fileModificationPrompt.AppendLine($"Reference request: {Prompt.Text}{Environment.NewLine}");
+        fileModificationPrompt.AppendLine($"Reference request: {promptText}{Environment.NewLine}");
         fileModificationPrompt.AppendLine("----");
         fileModificationPrompt.AppendLine($"Given,{Environment.NewLine}");
         fileModificationPrompt.AppendLine(header.ToString());
@@ -203,13 +207,12 @@ internal class Rewrite100 : FeatureCommon
         return result.Contains("true", StringComparison.OrdinalIgnoreCase);
     }
 
-    private string GetMetaFileContent(string file, string content)
+    private string GetMetaFileContent(string promptText, string file, string content)
     {
         EnsureThat.EnsureArg.IsNotNull(Connector, nameof(Connector));
-        EnsureThat.EnsureArg.IsNotNull(Prompt, nameof(Prompt));
 
         string prompt = $"# Given,{Environment.NewLine}" +
-            $"User prompt: {Prompt.Text}{Environment.NewLine}" +
+            $"User prompt: {promptText}{Environment.NewLine}" +
             $"--------{Environment.NewLine}" +
             $"Filename: {file}{Environment.NewLine}" +
             $"Content:{Environment.NewLine}{Environment.NewLine}" +
