@@ -11,6 +11,7 @@ namespace llmc.Features;
 
 internal abstract class FeatureCommon : IFeature
 {
+    public bool VerboseLogging { get; set; } = false;
     public bool NoUndo { get; set; } = false;
     public LlmConnector? Connector { get; set; }
     public Prompt? Prompt { get; set; }

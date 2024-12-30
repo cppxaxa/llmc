@@ -46,7 +46,8 @@ internal class Rewrite100 : FeatureCommon
 
         for (int i = 0; i < fileNames.Count; i++)
         {
-            Console.WriteLine($"{nameof(Rewrite100)}:Reading meta: {fileNames[i]}::{metaFileContents[i]}");
+            if (VerboseLogging) Console.WriteLine(
+                $"{nameof(Rewrite100)}:Reading meta: {fileNames[i]}::{metaFileContents[i]}");
 
             header.AppendLine($"Filename: {fileNames[i]}{Environment.NewLine}");
             header.AppendLine($"Modification request:{Environment.NewLine}");

@@ -3,6 +3,7 @@ using llmc.Executor;
 using llmc.Features;
 using llmc.Storage;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -185,6 +186,7 @@ internal class ProjectLogic(
         else
         {
             // Inject dependencies.
+            feature.VerboseLogging = commandLineParams.VerboseLogging;
             feature.NoUndo = commandLineParams.NoUndo;
             feature.Connector = connector;
             feature.Prompt = prompt;
@@ -307,5 +309,20 @@ internal class ProjectLogic(
         }
 
         return new FeatureResult(AnyFeatureProcessed: anyFeatureExecuted);
+    }
+
+    internal static ProjectModel ReadProjectJsonFromStdin()
+    {
+        ProjectModel? projectModel;
+        StringBuilder sb = new();
+        sb.Append((char)Console.Read());
+
+        while (!Common.TryParseJson(sb.ToString(), out projectModel))
+        {
+            int ch = Console.Read();
+            sb.Append((char)ch);
+        }
+
+        return projectModel!;
     }
 }

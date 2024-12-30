@@ -5,7 +5,7 @@
     },
     "llmc azure": {
       "commandName": "Project",
-      "commandLineArgs": "--azurellm --azureembedding"
+      "commandLineArgs": "--azurellm --azureembedding --projectpath \"C:/B/L1/llmc/playground\""
     },
     "llmc gemini": {
       "commandName": "Project",

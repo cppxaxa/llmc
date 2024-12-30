@@ -60,5 +60,19 @@ namespace llmc.Project
                 ?? throw new ArgumentException("Malformed parameter format.");
             return p ?? new Dictionary<string, string>();
         }
+
+        internal static bool TryParseJson<T>(string value, out T? projectModel)
+        {
+            try
+            {
+                projectModel = JsonConvert.DeserializeObject<T>(value);
+                return true;
+            }
+            catch
+            {
+                projectModel = default;
+                return false;
+            }
+        }
     }
 }

@@ -11,6 +11,8 @@ namespace llmc.Features;
 
 internal interface IFeature
 {
+    bool VerboseLogging { get; set; }
+
     bool NoUndo { get; set; }
 
     LlmConnector? Connector { get; set; }

@@ -11,25 +11,34 @@ if (args.Length == 1 && (args[0] == "--help" || args[0] == "-h" || args[0] == "/
 
     Console.WriteLine("Commandline parameters:");
     Console.WriteLine("llmc.exe --help | -h | /? : Display this help message");
+    Console.WriteLine("llmc.exe --verbose : Enable verbose logging");
     Console.WriteLine("llmc.exe --noundo : Do not generate undo.executor.txt file");
     Console.WriteLine("llmc.exe --disableinmemorystorage : Disable in-memory storage flag");
     Console.WriteLine("llmc.exe --azurellm : Use Azure LLM");
     Console.WriteLine("llmc.exe --azureembedding : Use Azure Embedding");
     Console.WriteLine("llmc.exe --geminillm : Use Gemini LLM");
     Console.WriteLine("llmc.exe --geminiembedding : Use Gemini Embedding");
+    Console.WriteLine("llmc.exe --stdinprojectjson : Read project json from stdin");
+    Console.WriteLine("llmc.exe --projectpath <path> : Path to the project file. Default is current directory");
 
     return;
 }
 
 // Commandline parameters.
+bool verbose = args.Contains("--verbose");
 bool noUndo = args.Contains("--noundo");
 bool disableInMemoryStorage = args.Contains("--disableinmemorystorage");
 bool azureLlm = args.Contains("--azurellm");
 bool azureEmbedding = args.Contains("--azureembedding");
 bool geminiLlm = args.Contains("--geminillm");
 bool geminiEmbedding = args.Contains("--geminiembedding");
+bool stdinProjectJson = args.Contains("--stdinprojectjson");
+int projectPathIndex = args.Select((e, i) => (e, i))
+    .Where(e => e.e == "--projectpath").FirstOrDefault(("", -1)).Item2;
+string projectPath = projectPathIndex != -1 && args.Length > projectPathIndex + 1
+    ? args[projectPathIndex + 1] : Directory.GetCurrentDirectory();
 
-CommandLineParams commandLineParams = new(NoUndo: noUndo);
+CommandLineParams commandLineParams = new(VerboseLogging: verbose, NoUndo: noUndo);
 
 var geminiLlmConfiguration = new Configuration(
     Type: ConfigurationType.Llm,
@@ -75,7 +84,7 @@ if (azureEmbedding) configurations.Insert(0, aoaiEmbeddingConfiguration);
 if (geminiLlm) configurations.Insert(0, geminiLlmConfiguration);
 if (geminiEmbedding) configurations.Insert(0, geminiEmbeddingConfiguration);
 
-void LogEnvironmentVariablesName()
+void LogCommandLineParams()
 {
     foreach (var configuration in configurations)
     {
@@ -83,25 +92,39 @@ void LogEnvironmentVariablesName()
         Console.WriteLine($"GeminiUrlEnvVar: {configuration.GeminiUrlEnvVar}");
     }
 
+    if (verbose) Console.WriteLine("Switch: --verbose");
+    if (noUndo) Console.WriteLine("Switch: --noundo");
+    if (disableInMemoryStorage) Console.WriteLine("Switch: --disableinmemorystorage");
     if (azureLlm) Console.WriteLine("Switch: --azurellm");
     if (azureEmbedding) Console.WriteLine("Switch: --azureembedding");
     if (geminiLlm) Console.WriteLine("Switch: --geminillm");
     if (geminiEmbedding) Console.WriteLine("Switch: --geminiembedding");
+    if (stdinProjectJson) Console.WriteLine("Switch: --stdinprojectjson");
+    if (projectPathIndex != -1) Console.WriteLine($"Parameter: --projectpath {projectPath}");
 }
 
-LogEnvironmentVariablesName();
+LogCommandLineParams();
 
 // Default behavior.
-var storage = new SwitchableStorage(new(
-    EnableInMemoryStorage: false));
+var storage = new SwitchableStorage(new(EnableInMemoryStorage: false));
+ProjectModel? project = null!;
 
-string projectPath = Directory.GetCurrentDirectory();
-ProjectModel? project = ProjectLogic.ReadProjectJson(storage, projectPath);
+// Read project json.
+if (stdinProjectJson)
+{
+    Console.WriteLine("Waiting for project json from stdin ...");
+    project = ProjectLogic.ReadProjectJsonFromStdin();
+}
+else
+{
+    project = ProjectLogic.ReadProjectJson(storage, projectPath);
+}
 
+// Validate project.
 if (project == null)
 {
-    projectPath = @"C:\B\L1\llmc\playground";
-    project = ProjectLogic.ReadProjectJson(storage, @"C:\B\L1\llmc\playground")!;
+    Console.WriteLine("Unable to figure out the project. Exiting...");
+    return;
 }
 
 var llmConnector = new LlmConnector(configurations);
@@ -111,7 +134,10 @@ var executorFinder = new ExecutorFinder(llmConnector);
 var executorInvoker = new ExecutorInvoker(project, storage, llmConnector);
 var fileRedactor = new FileRedactor(llmConnector, executorInvoker);
 
-var projectLogic = new ProjectLogic(projectPath, project, commandLineParams, storage, llmConnector, promptDecorator, promptExtractor, executorFinder, executorInvoker, fileRedactor);
+var projectLogic = new ProjectLogic(
+    projectPath, project, commandLineParams, storage,
+    llmConnector, promptDecorator, promptExtractor,
+    executorFinder, executorInvoker, fileRedactor);
 
 // Validation.
 projectLogic.Validate();
@@ -171,7 +197,6 @@ foreach (var prompt in prompts)
 }
 
 /* TODO:
- * [ ] C# library integrator 
- * [ ] Project json from stdin
  * [ ] Make prompts for presets
+ * [ ] C# library integrator
  */
