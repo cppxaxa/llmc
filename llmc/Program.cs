@@ -197,6 +197,7 @@ foreach (var prompt in prompts)
 }
 
 /* TODO:
+ * [ ] Match word search in searchtext
  * [ ] Make prompts for presets
  * [ ] C# library integrator
  */

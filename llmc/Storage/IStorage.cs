@@ -21,6 +21,7 @@ public interface IStorage
     string ReadAllText(string path);
     void WriteAllLines(string path, IEnumerable<string> lines);
     string[] ReadAllLines(string path);
+    void AppendAllText(string path, string content);
     void AppendAllLines(string path, IEnumerable<string> lines);
     string ReadAllText(string path, Encoding encoding);
     string[] GetFiles(string path, string wildcard);

@@ -32,6 +32,25 @@ namespace llmc.Storage
             return this;
         }
 
+        public void AppendAllText(string path, string content)
+        {
+            path = GetPath(path);
+
+            if (storageConfiguration.EnableInMemoryStorage)
+            {
+                if (!inMemory.ContainsKey(path))
+                {
+                    inMemory[path] = string.Empty;
+                }
+
+                inMemory[path] = inMemory[path] + content;
+            }
+            else
+            {
+                File.AppendAllText(path, content);
+            }
+        }
+
         public void AppendAllLines(string path, IEnumerable<string> lines)
         {
             path = GetPath(path);

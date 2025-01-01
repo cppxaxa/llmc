@@ -18,6 +18,8 @@ namespace llmc.Executor
             StringBuilder undo = new();
 
             Dictionary<string, string> p = Common.ParseParam(param);
+            string nlines = p.ContainsKey("nlines") ? p["nlines"] : "-1";
+            int n = int.Parse(nlines);
             string filename = p["filename"];
             string fullPath = Path.Join(parentDirectory, filename);
 
@@ -27,7 +29,16 @@ namespace llmc.Executor
 
             if (Storage.Exists(fullPath))
             {
-                Console.WriteLine(Storage.ReadAllText(fullPath));
+                string content = Storage.ReadAllText(fullPath);
+
+                if (n > 0)
+                {
+                    string sep = Common.FindLineSeparator(content);
+                    string[] lines = content.Split(sep);
+                    content = string.Join(sep, lines.Take(n));
+                }
+
+                Console.WriteLine(content);
             }
 
             Console.WriteLine($"</consolewriteline>");
