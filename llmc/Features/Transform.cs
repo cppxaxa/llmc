@@ -48,7 +48,9 @@ internal class Transform : FeatureCommon
                 promptText,
                 [(nameof(fpath), fpath), ("value", content)],
                 [typeof(string).Assembly, Assembly.GetExecutingAssembly()],
-                ["System.Linq", "System.Math", "System.IO", "System", "Newtonsoft.Json"]);
+                [
+                    "System.Linq", "System.Math", "System.IO",
+                    "System", "Newtonsoft.Json", "Newtonsoft.Json.Linq"]);
 
             // Save.
             SaveOutput(fpath, result, parentDirectory, outputpath, outputfile, outputappendfile);

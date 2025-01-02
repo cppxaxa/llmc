@@ -1,7 +1,7 @@
 Features:
 - Rewrite100(repo="search-results-test",wildcard="*.md")
 Flags:
-- EnableInMemoryStorage11
+- EnableInMemoryStorage
 PreBuild:
 - DeleteFolder(folder="search-results-test")
 - CopyFolder(source="presetsvector-search",destination="search-results-test")
