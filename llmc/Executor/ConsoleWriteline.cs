@@ -27,6 +27,11 @@ namespace llmc.Executor
             Console.WriteLine($"## FullPath:{fullPath}");
             Console.WriteLine($"## Exists:{Storage.Exists(fullPath)}");
 
+            if (n > 0)
+            {
+                Console.WriteLine($"## NLines:{n}");
+            }
+
             if (Storage.Exists(fullPath))
             {
                 string content = Storage.ReadAllText(fullPath);

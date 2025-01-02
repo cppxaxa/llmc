@@ -11,7 +11,7 @@ public interface IStorage
     IStorage Clone();
     IStorage ApplyConfiguration(StorageConfiguration configuration);
     void DeleteDirectory(string path, bool recursive);
-    bool Exists(string path);
+    bool Exists(string? path);
     IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption);
     void CreateDirectory(string path);
     void Move(string sourcePath, string destinationPath);

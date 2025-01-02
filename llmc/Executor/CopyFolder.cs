@@ -25,7 +25,7 @@ internal class CopyFolder : ExecutorCommon
 
         if (Storage.Exists(Path.Join(parentDirectory, destination)))
         {
-            Storage.Move(
+            Storage.MoveDirectory(
                 Path.Join(parentDirectory, destination),
                 Path.Join(parentDirectory, destination + ".bak-" + Guid.NewGuid()));
         }

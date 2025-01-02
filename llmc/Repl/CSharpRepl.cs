@@ -50,8 +50,21 @@ internal class CSharpRepl
 
         ScriptHandler.ScriptResult? scriptResult = results.FirstOrDefault();
 
+        string scriptResultString = scriptResult?.Result ?? "\"\"";
+        scriptResultString = scriptResultString.Length < 2
+            ? "\"\""
+            : scriptResultString;
+
+        scriptResultString = scriptResultString[0] == '"'
+            ? scriptResultString.Substring(1)
+            : scriptResultString;
+
+        scriptResultString = scriptResultString[^1] == '"'
+            ? scriptResultString.Substring(0, scriptResultString.Length - 1)
+            : scriptResultString;
+
         return new ScriptResult(
-            JsonConvert.DeserializeObject<string>(scriptResult?.Result ?? "\"\"") ?? string.Empty,
+            scriptResultString,
             scriptResult?.IsError ?? false,
             scriptResult?.IsCancelled ?? false);
     }

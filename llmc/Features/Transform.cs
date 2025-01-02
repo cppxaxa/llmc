@@ -48,7 +48,7 @@ internal class Transform : FeatureCommon
                 promptText,
                 [(nameof(fpath), fpath), ("value", content)],
                 [typeof(string).Assembly, Assembly.GetExecutingAssembly()],
-                ["System.Linq", "System.Math", "System.IO", "System"]);
+                ["System.Linq", "System.Math", "System.IO", "System", "Newtonsoft.Json"]);
 
             // Save.
             SaveOutput(fpath, result, parentDirectory, outputpath, outputfile, outputappendfile);
@@ -81,13 +81,29 @@ internal class Transform : FeatureCommon
         {
             string path = Path.Combine(parentDirectory, outputfile);
 
+            string outputDirectory = Path.GetDirectoryName(path)
+                ?? throw new Exception("Error in getting output directory.");
+
+            if (!Storage.Exists(outputDirectory))
+            {
+                Storage.CreateDirectory(outputDirectory);
+            }
+
             Storage.WriteAllText(path, result.Result);
         }
         else if (!string.IsNullOrEmpty(outputappendfile))
         {
             string path = Path.Combine(parentDirectory, outputappendfile);
-            
-            if (Storage.Exists(path))
+
+            string outputDirectory = Path.GetDirectoryName(path)
+                ?? throw new Exception("Error in getting output directory.");
+
+            if (!Storage.Exists(outputDirectory))
+            {
+                Storage.CreateDirectory(outputDirectory);
+            }
+
+            if (!Storage.Exists(path))
             {
                 Storage.WriteAllText(path, string.Empty);
             }

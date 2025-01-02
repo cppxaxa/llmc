@@ -121,6 +121,7 @@ namespace llmc.Storage
             string path, string wildcard, SearchOption searchOption)
         {
             path = GetPath(path);
+            char pathSeparator = GetPathSeparator(path);
 
             IEnumerable<string> localFiles = [];
 
@@ -133,7 +134,7 @@ namespace llmc.Storage
             {
                 if (searchOption == SearchOption.AllDirectories)
                 {
-                    return inMemory.Keys.Where(k => k.StartsWith(path) &&
+                    return inMemory.Keys.Where(k => k.StartsWith(path + pathSeparator) &&
                         Common.IsWildcardMatch(Path.GetFileName(k), wildcard))
                         .Union(localFiles).ToList();
                 }
@@ -153,6 +154,13 @@ namespace llmc.Storage
             {
                 return localFiles;
             }
+        }
+
+        private static char GetPathSeparator(string path)
+        {
+            string dummyDirectoryName = "dummy";
+            string p = GetPath(Path.Join(path, dummyDirectoryName));
+            return p.Substring(path.Length)[0];
         }
 
         public IEnumerable<string> EnumerateFiles(string path, string wildcard)
@@ -202,8 +210,10 @@ namespace llmc.Storage
             }
         }
 
-        public bool Exists(string path)
+        public bool Exists(string? path)
         {
+            if (string.IsNullOrEmpty(path)) return false;
+
             path = GetPath(path);
 
             bool localPathExists = File.Exists(path) || Directory.Exists(path);

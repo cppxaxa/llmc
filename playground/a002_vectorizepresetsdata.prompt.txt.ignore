@@ -1,0 +1,4 @@
+PreBuild:
+- DeleteFolder(folder="presetsvector")
+- VectorizeVanilla(jsonlfolder="transformed_results",searchjsonkey="searchtext",out="presetsvector")
+---

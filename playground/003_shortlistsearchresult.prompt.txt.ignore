@@ -1,0 +1,19 @@
+Features:
+- Rewrite100(repo="search-results-test",wildcard="*.md")
+Flags:
+- EnableInMemoryStorage
+PreBuild:
+- DeleteFolder(folder="search-results-test")
+- CopyFolder(source="dimensions-search",destination="search-results-test")
+- ApplyMacros(folder="search-results-test",wildcard="*.md")
+PostBuild:
+- MarkdownExtractor(input="search-results-test/README.md",output="search-results-test/extracted.jsonl",sectionsearch="Filtered json",removecodeannotation="true")
+- ConsoleWriteline(filename="search-results-test/extracted.jsonl")
+---
+You are an intelligent natural language processor, powered by AI.
+I want you to fix the TODO in README.md with minimal changes.
+The filtered json are shortlisted json lines from pool of json mentioned in README.md
+based on the following user query
+"{{{chartquery}}}"
+The filtered json are exact subset of pool of json and remember to enclose with ```jsonl annotation.
+Give instructions to write README.md with new content.
