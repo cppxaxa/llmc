@@ -15,9 +15,9 @@ internal class StdStreamEmbeddingClient : IEmbeddingClient
 
         stringBuilder.AppendLine($"## Respond back text inside " +
             $"{responseStart} and {responseEnd} tags.");
-        stringBuilder.AppendLine($"<prompt>");
+        stringBuilder.AppendLine($"<llmcembeddingprompt>");
         stringBuilder.AppendLine(input);
-        stringBuilder.AppendLine("</prompt>");
+        stringBuilder.AppendLine("</llmcembeddingprompt>");
 
         Console.WriteLine(stringBuilder.ToString());
 

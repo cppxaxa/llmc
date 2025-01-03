@@ -1,5 +1,5 @@
 ﻿
-namespace llmc.Connector;
+namespace LlmcConsumer.Connector;
 
 internal class LlmConnector(List<Configuration> configurations)
 {
@@ -31,11 +31,7 @@ internal class LlmConnector(List<Configuration> configurations)
                 configurations
                 .First(e => e.Type == ConfigurationType.Llm));
 
-        if (configurationCache[ConfigurationType.Llm].EnableStdStream)
-        {
-            return new StdStreamLlmClient();
-        }
-        else if (configurationCache[ConfigurationType.Llm].EnableGemini)
+        if (configurationCache[ConfigurationType.Llm].EnableGemini)
         {
             return new GeminiLlmClient(configurationCache[ConfigurationType.Llm]);
         }
@@ -53,11 +49,7 @@ internal class LlmConnector(List<Configuration> configurations)
                 configurations
                 .First(e => e.Type == ConfigurationType.Embedding));
 
-        if (configurationCache[ConfigurationType.Embedding].EnableStdStream)
-        {
-            return new StdStreamEmbeddingClient();
-        }
-        else if (configurationCache[ConfigurationType.Embedding].EnableGemini)
+        if (configurationCache[ConfigurationType.Embedding].EnableGemini)
         {
             return new GeminiEmbeddingClient(
                 configurationCache[ConfigurationType.Embedding]);

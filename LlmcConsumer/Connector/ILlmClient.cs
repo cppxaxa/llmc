@@ -1,4 +1,4 @@
-﻿namespace llmc.Connector;
+﻿namespace LlmcConsumer.Connector;
 
 internal interface ILlmClient
 {

@@ -11,6 +11,7 @@ if (args.Length == 1 && (args[0] == "--help" || args[0] == "-h" || args[0] == "/
 
     Console.WriteLine("Commandline parameters:");
     Console.WriteLine("llmc.exe --help | -h | /? : Display this help message");
+    Console.WriteLine("llmc.exe --parentprocessid <id> : Parent process id");
     Console.WriteLine("llmc.exe --verbose : Enable verbose logging");
     Console.WriteLine("llmc.exe --noundo : Do not generate undo.executor.txt file");
     Console.WriteLine("llmc.exe --disableinmemorystorage : Disable in-memory storage flag");
@@ -26,6 +27,10 @@ if (args.Length == 1 && (args[0] == "--help" || args[0] == "-h" || args[0] == "/
 
 // Commandline parameters.
 bool verbose = args.Contains("--verbose");
+int parentProcessIdIndex = args.Select((e, i) => (e, i))
+    .Where(e => e.e == "--parentprocessid").FirstOrDefault(("", -1)).Item2;
+int parentProcessId = parentProcessIdIndex != -1 && args.Length > parentProcessIdIndex + 1
+    ? int.Parse(args[parentProcessIdIndex + 1]) : -1;
 bool noUndo = args.Contains("--noundo");
 bool disableInMemoryStorage = args.Contains("--disableinmemorystorage");
 bool azureLlm = args.Contains("--azurellm");
@@ -37,6 +42,11 @@ int projectPathIndex = args.Select((e, i) => (e, i))
     .Where(e => e.e == "--projectpath").FirstOrDefault(("", -1)).Item2;
 string projectPath = projectPathIndex != -1 && args.Length > projectPathIndex + 1
     ? args[projectPathIndex + 1] : Directory.GetCurrentDirectory();
+
+// Honor parent process id.
+Thread monitoringThread = new(() => Common.MonitorProcess(parentProcessId));
+monitoringThread.IsBackground = true; // Mark as background thread
+monitoringThread.Start();
 
 CommandLineParams commandLineParams = new(VerboseLogging: verbose, NoUndo: noUndo);
 
@@ -93,6 +103,7 @@ void LogCommandLineParams()
     }
 
     if (verbose) Console.WriteLine("Switch: --verbose");
+    if (parentProcessIdIndex != -1) Console.WriteLine($"Parameter: --parentprocessid {parentProcessId}");
     if (noUndo) Console.WriteLine("Switch: --noundo");
     if (disableInMemoryStorage) Console.WriteLine("Switch: --disableinmemorystorage");
     if (azureLlm) Console.WriteLine("Switch: --azurellm");
@@ -197,7 +208,7 @@ foreach (var prompt in prompts)
 }
 
 /* TODO:
- * [ ] ConsoleWriteline tag support
+ * [x] ConsoleWriteline tag support
  * [ ] Retry support, based on acceptance C# logic
  * [ ] C# library integrator with LLM callbacks, projectJson input, and consoleoutput
  * 

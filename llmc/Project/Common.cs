@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -50,6 +51,39 @@ namespace llmc.Project
 
             // Match the filename against the regex pattern
             return Regex.IsMatch(fileName, regexPattern, RegexOptions.IgnoreCase);
+        }
+
+        internal static void MonitorProcess(int pid)
+        {
+            while (true)
+            {
+                if (!IsProcessAlive(pid))
+                {
+                    Console.WriteLine("Monitored process is no longer alive. Exiting...");
+                    Environment.Exit(0); // Terminate the entire program
+                }
+
+                Thread.Sleep(10000); // Check every 1 second
+            }
+        }
+
+        internal static bool IsProcessAlive(int pid)
+        {
+            try
+            {
+                Process process = Process.GetProcessById(pid);
+                return !process.HasExited; // Check explicitly if it has exited
+            }
+            catch (ArgumentException)
+            {
+                // Process does not exist
+                return false;
+            }
+            catch (InvalidOperationException)
+            {
+                // Process is no longer running
+                return false;
+            }
         }
 
         internal static Dictionary<string, string> ParseParam(string param)

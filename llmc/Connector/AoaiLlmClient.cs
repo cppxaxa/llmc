@@ -5,7 +5,7 @@ namespace llmc.Connector;
 
 internal class AoaiLlmClient(Configuration configuration) : ILlmClient
 {
-    public string Complete(string prompt)
+    public string Complete(string system, string prompt)
     {
         if (configuration.EnableAoai)
         {
@@ -31,7 +31,7 @@ internal class AoaiLlmClient(Configuration configuration) : ILlmClient
             {
                 messages = new[]
                 {
-                    new { role = "system", content = GetSystemPrompt() },
+                    new { role = "system", content = system },
                     new { role = "user", content = prompt }
                 }
             });
@@ -81,6 +81,11 @@ internal class AoaiLlmClient(Configuration configuration) : ILlmClient
         }
 
         return string.Empty;
+    }
+
+    public string Complete(string prompt)
+    {
+        return Complete(GetSystemPrompt(), prompt);
     }
 
     /// <summary>

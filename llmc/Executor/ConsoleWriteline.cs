@@ -55,14 +55,7 @@ namespace llmc.Executor
                 Console.WriteLine(content);
             }
 
-            if (!string.IsNullOrEmpty(tag))
-            {
-                Console.WriteLine($"</consolewriteline tag=\"{tag}\">");
-            }
-            else
-            {
-                Console.WriteLine($"</consolewriteline>");
-            }
+            Console.WriteLine($"</consolewriteline>");
 
             return undo.ToString();
         }

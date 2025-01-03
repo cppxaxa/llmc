@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using System.Text;
 
-namespace llmc.Connector;
+namespace LlmcConsumer.Connector;
 
 internal class GeminiLlmClient(Configuration configuration) : ILlmClient
 {
