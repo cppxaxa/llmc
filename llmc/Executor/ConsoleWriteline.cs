@@ -22,8 +22,17 @@ namespace llmc.Executor
             int n = int.Parse(nlines);
             string filename = p["filename"];
             string fullPath = Path.Join(parentDirectory, filename);
+            string? tag = p.ContainsKey("tag") ? p["tag"] : null;
 
-            Console.WriteLine($"<consolewriteline>");
+            if (!string.IsNullOrEmpty(tag))
+            {
+                Console.WriteLine($"<consolewriteline tag=\"{tag}\">");
+            }
+            else
+            {
+                Console.WriteLine($"<consolewriteline>");
+            }
+
             Console.WriteLine($"## FullPath:{fullPath}");
             Console.WriteLine($"## Exists:{Storage.Exists(fullPath)}");
 
@@ -46,7 +55,14 @@ namespace llmc.Executor
                 Console.WriteLine(content);
             }
 
-            Console.WriteLine($"</consolewriteline>");
+            if (!string.IsNullOrEmpty(tag))
+            {
+                Console.WriteLine($"</consolewriteline tag=\"{tag}\">");
+            }
+            else
+            {
+                Console.WriteLine($"</consolewriteline>");
+            }
 
             return undo.ToString();
         }

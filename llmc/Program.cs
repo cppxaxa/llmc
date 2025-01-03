@@ -197,7 +197,11 @@ foreach (var prompt in prompts)
 }
 
 /* TODO:
+ * [ ] ConsoleWriteline tag support
+ * [ ] Retry support, based on acceptance C# logic
+ * [ ] C# library integrator with LLM callbacks, projectJson input, and consoleoutput
+ * 
+ * [ ] Graph representation of whole project
+ * [ ] Curl command template support with C# script parser
  * [ ] Match word search in searchtext
- * [ ] Make prompts for presets
- * [ ] C# library integrator
  */
