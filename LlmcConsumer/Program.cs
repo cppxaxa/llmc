@@ -3,7 +3,7 @@ using LlmcConsumer.Connector;
 using LlmcConsumer.LlmcWrapper;
 using Newtonsoft.Json;
 
-Console.WriteLine("LlmConsumer starting...");
+Console.WriteLine("LlmcConsumer starting...");
 
 var geminiLlmConfiguration = new Configuration(
     Type: ConfigurationType.Llm,
@@ -44,15 +44,15 @@ string funcEmbedding(string prompt)
 Llmc llmc = new(new LlmcConfiguration(
     azurellm: false, azureembedding: false, noundo: true));
 
-Console.WriteLine("LlmConsumer: Sample query: Tell me ad clicks for China and US market from PCT and it should be Shopping ad");
-Console.WriteLine("LlmConsumer: Enter chart query");
+Console.WriteLine("LlmcConsumer: Sample query: Tell me ad clicks for China and US market from PCT and it should be Shopping ad");
+Console.WriteLine("LlmcConsumer: Enter chart query");
 
 string? userQuery = Console.ReadLine();
 
 if (string.IsNullOrWhiteSpace(userQuery))
 {
     userQuery = "Tell me ad clicks for China and US market from PCT and it should be Shopping ad";
-    Console.WriteLine("LlmConsumer: Using default query: " + userQuery);
+    Console.WriteLine("LlmcConsumer: Using default query: " + userQuery);
 }
 
 string projectJson = JsonConvert.SerializeObject(new
@@ -63,26 +63,64 @@ string projectJson = JsonConvert.SerializeObject(new
     }
 });
 
-string projectCwd = "C:\\B\\L1\\llmc\\playground";
+string[] projectCwdList = [
+    "C:\\B\\L1\\llmc\\playground\\project-presetsearch_real",
+    "C:\\B\\L1\\llmc\\playground\\project-dimensionsearch_real",
+];
 
-var result = llmc.Execute(
-    passthroughStdout: true, printLlmResult: true,
-    projectCwd: projectCwd, projectJson: projectJson,
-    funcLlm: funcLlm, funcEmbedding: funcEmbedding);
+ConsoleColor color;
 
-Console.WriteLine("LLMC output:");
-
-if (result.ConsoleWriteline.ContainsKey("shortlistpresets"))
+foreach (var projectCwd in projectCwdList)
 {
-    Console.WriteLine(result.ConsoleWriteline["shortlistpresets"]);
-}
+    color = Console.ForegroundColor;
+    Console.ForegroundColor = ConsoleColor.Yellow;
+    Console.WriteLine("LlmcConsumer: Running LLMC for project in " + projectCwd);
+    Console.ForegroundColor = color;
 
-if (result.ConsoleWriteline.ContainsKey("user-prompt-without-presets"))
-{
-    Console.WriteLine(result.ConsoleWriteline["user-prompt-without-presets"]);
-}
+    var result = llmc.Execute(
+        passthroughStdout: false, printLlmResult: false,
+        projectCwd: projectCwd, projectJson: projectJson,
+        funcLlm: funcLlm, funcEmbedding: funcEmbedding);
 
-if (result.ConsoleWriteline.ContainsKey("dimensions"))
-{
-    Console.WriteLine(result.ConsoleWriteline["dimensions"]);
+    Console.WriteLine("LLMC output:");
+
+    if (result.ConsoleWriteline.ContainsKey("presetspool"))
+    {
+        color = Console.ForegroundColor;
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Presets pool:");
+        Console.ForegroundColor = color;
+        Console.WriteLine(result.ConsoleWriteline["presetspool"]);
+        Console.WriteLine();
+    }
+
+    if (result.ConsoleWriteline.ContainsKey("shortlistpresets"))
+    {
+        color = Console.ForegroundColor;
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Shortlist presets:");
+        Console.ForegroundColor = color;
+        Console.WriteLine(result.ConsoleWriteline["shortlistpresets"]);
+        Console.WriteLine();
+    }
+
+    if (result.ConsoleWriteline.ContainsKey("user-prompt-without-presets"))
+    {
+        color = Console.ForegroundColor;
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("User prompt without presets:");
+        Console.ForegroundColor = color;
+        Console.WriteLine(result.ConsoleWriteline["user-prompt-without-presets"]);
+        Console.WriteLine();
+    }
+
+    if (result.ConsoleWriteline.ContainsKey("dimensions"))
+    {
+        color = Console.ForegroundColor;
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.WriteLine("Dimensions:");
+        Console.ForegroundColor = color;
+        Console.WriteLine(result.ConsoleWriteline["dimensions"]);
+        Console.WriteLine();
+    }
 }

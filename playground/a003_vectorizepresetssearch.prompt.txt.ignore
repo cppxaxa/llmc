@@ -1,8 +1,0 @@
-Features:
-- VectorizedVanillaSearch(source="presetsvector_real",nresults="5",file="presetsvector-search/search-result.jsonl",slidingwordsize="4",slidingwordoverlap="2")
-Flags:
-- EnableInMemoryStorage
-PostBuild:
-- ConsoleWriteline(filename="presetsvector-search/search-result.jsonl")
----
-{{{chartquery}}}

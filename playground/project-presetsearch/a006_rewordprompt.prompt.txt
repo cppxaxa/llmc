@@ -8,7 +8,7 @@ PreBuild:
 - ApplyMacros(folder="promptmodifier-test",wildcard="*.md")
 PostBuild:
 - MarkdownExtractor(input="promptmodifier-test/README.md",output="promptmodifier-test/extracted.txt",sectionsearch="User query without presets",removecodeannotation="true")
-- ConsoleWriteline(filename="promptmodifier-test/extracted.txt")
+- ConsoleWriteline(tag="user-prompt-without-presets",filename="promptmodifier-test/extracted.txt")
 ---
 You are an intelligent natural language processor, powered by AI.
 I want you to fix the TODO in README.md with minimal changes.

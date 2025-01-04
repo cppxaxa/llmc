@@ -44,9 +44,12 @@ string projectPath = projectPathIndex != -1 && args.Length > projectPathIndex + 
     ? args[projectPathIndex + 1] : Directory.GetCurrentDirectory();
 
 // Honor parent process id.
-Thread monitoringThread = new(() => Common.MonitorProcess(parentProcessId));
-monitoringThread.IsBackground = true; // Mark as background thread
-monitoringThread.Start();
+if (parentProcessIdIndex >= 0)
+{
+    Thread monitoringThread = new(() => Common.MonitorProcess(parentProcessId));
+    monitoringThread.IsBackground = true; // Mark as background thread
+    monitoringThread.Start();
+}
 
 CommandLineParams commandLineParams = new(VerboseLogging: verbose, NoUndo: noUndo);
 
