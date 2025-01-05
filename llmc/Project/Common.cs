@@ -108,5 +108,51 @@ namespace llmc.Project
                 return false;
             }
         }
+
+        internal static bool IsLowercaseOrPascalCase(string word)
+        {
+            // Check if the word is all lowercase
+            if (word.All(char.IsLower)) return true;
+
+            // Check if the word is PascalCase (first letter uppercase, rest lowercase)
+            if (word.Length > 1 && char.IsUpper(word[0]) && word.Substring(1).All(char.IsLower)) return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Given markdown code annotation, extract the code block content.
+        /// </summary>
+        internal static string RemoveCodeAnnotations(string simplerQuery)
+        {
+            string newlineSep = FindLineSeparator(simplerQuery);
+
+            List<string> lines = simplerQuery.Split(newlineSep).ToList();
+
+            if (lines.Count < 2)
+            {
+                return simplerQuery;
+            }
+
+            while (lines.Count > 0 && !lines[0].StartsWith("```"))
+            {
+                lines.RemoveAt(0);
+            }
+
+            if (lines[0].StartsWith("```"))
+            {
+                lines.RemoveAt(0);
+            }
+
+            // Check if there are any line starting from ```.
+            int index = lines.FindIndex(l => l.StartsWith("```"));
+
+            if (index != -1)
+            {
+                lines = lines.GetRange(0, index);
+            }
+
+            return string.Join(newlineSep, lines);
+        }
     }
 }

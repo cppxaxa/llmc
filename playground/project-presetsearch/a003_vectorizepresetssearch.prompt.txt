@@ -1,5 +1,5 @@
 Features:
-- VectorizedVanillaSearch(source="presetsvector",nresults="5",file="presetsvector-search/search-result.jsonl",slidingwordsize="4",slidingwordoverlap="2")
+- HybridSearch(source="presetsvector",nresults="5",file="presetsvector-search/search-result.jsonl",slidingwordsize="4",slidingwordoverlap="2",searchjsonkey="searchtext")
 Flags:
 - EnableInMemoryStorage
 PostBuild:
