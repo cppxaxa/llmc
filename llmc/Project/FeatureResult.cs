@@ -1,3 +1,5 @@
 ﻿namespace llmc.Project;
 
-internal record FeatureResult(bool AnyFeatureProcessed);
+internal record FeatureResult(
+    bool AnyFeatureProcessed,
+    string? GotoPromptsAfter);

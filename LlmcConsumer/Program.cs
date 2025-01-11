@@ -44,14 +44,14 @@ string funcEmbedding(string prompt)
 Llmc llmc = new(new LlmcConfiguration(
     azurellm: false, azureembedding: false, noundo: true));
 
-Console.WriteLine("LlmcConsumer: Sample query: Tell me ad clicks for China and US market from PCT and it should be Shopping ad");
+Console.WriteLine("LlmcConsumer: Sample query: Tell me ad clicks for China and US market from PCT and it should be Shopping ad campaign type");
 Console.WriteLine("LlmcConsumer: Enter chart query");
 
 string? userQuery = Console.ReadLine();
 
 if (string.IsNullOrWhiteSpace(userQuery))
 {
-    userQuery = "Tell me ad clicks for China and US market from PCT and it should be Shopping ad";
+    userQuery = "Tell me ad clicks for China and US market from PCT and it should be Shopping ad campaign type";
     Console.WriteLine("LlmcConsumer: Using default query: " + userQuery);
 }
 
@@ -65,7 +65,7 @@ string projectJson = JsonConvert.SerializeObject(new
 
 string[] projectCwdList = [
     "C:\\B\\L1\\llmc\\playground\\project-presetsearch_real",
-    "C:\\B\\L1\\llmc\\playground\\project-dimensionsearch_real",
+    //"C:\\B\\L1\\llmc\\playground\\project-dimensionsearch_real",
 ];
 
 ConsoleColor color;
@@ -83,16 +83,6 @@ foreach (var projectCwd in projectCwdList)
         funcLlm: funcLlm, funcEmbedding: funcEmbedding);
 
     Console.WriteLine("LLMC output:");
-
-    if (result.ConsoleWriteline.ContainsKey("presetspool"))
-    {
-        color = Console.ForegroundColor;
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Presets pool:");
-        Console.ForegroundColor = color;
-        Console.WriteLine(result.ConsoleWriteline["presetspool"]);
-        Console.WriteLine();
-    }
 
     if (result.ConsoleWriteline.ContainsKey("shortlistpresets"))
     {
@@ -123,4 +113,24 @@ foreach (var projectCwd in projectCwdList)
         Console.WriteLine(result.ConsoleWriteline["dimensions"]);
         Console.WriteLine();
     }
+
+    //if (result.ConsoleWriteline.ContainsKey("presetspool"))
+    //{
+    //    color = Console.ForegroundColor;
+    //    Console.ForegroundColor = ConsoleColor.Green;
+    //    Console.WriteLine("Presets pool:");
+    //    Console.ForegroundColor = color;
+    //    Console.WriteLine(result.ConsoleWriteline["presetspool"]);
+    //    Console.WriteLine();
+    //}
+
+    //if (result.ConsoleWriteline.ContainsKey("dimensionssearchresult"))
+    //{
+    //    color = Console.ForegroundColor;
+    //    Console.ForegroundColor = ConsoleColor.Cyan;
+    //    Console.WriteLine("Dimensions search result:");
+    //    Console.ForegroundColor = color;
+    //    Console.WriteLine(result.ConsoleWriteline["dimensionssearchresult"]);
+    //    Console.WriteLine();
+    //}
 }

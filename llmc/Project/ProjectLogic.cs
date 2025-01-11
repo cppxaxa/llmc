@@ -43,7 +43,7 @@ internal class ProjectLogic(
 
     public List<Prompt> ReadPrompts(bool disableInMemoryStorage)
     {
-        List<string> prompts = [];
+        List<(string, string)> prompts = [];
 
         foreach (var file in storage.GetFiles(parentPath))
         {
@@ -54,7 +54,7 @@ internal class ProjectLogic(
                 // Apply prompt macros.
                 fileContent = Common.ApplyProjectMacros(project, fileContent);
 
-                prompts.Add(fileContent);
+                prompts.Add((Path.GetFileName(file), fileContent));
             }
         }
 
@@ -63,7 +63,7 @@ internal class ProjectLogic(
             Console.WriteLine("No prompts found in the project directory");
         }
 
-        return prompts.Select(promptExtractor.Extract)
+        return prompts.Select(e => promptExtractor.Extract(e.Item1, e.Item2))
             .Select(e =>
             {
                 if (disableInMemoryStorage)
@@ -278,7 +278,8 @@ internal class ProjectLogic(
             }
         }
 
-        return new FeatureResult(AnyFeatureProcessed: anyFeatureExecuted);
+        return new FeatureResult(
+            AnyFeatureProcessed: anyFeatureExecuted, GotoPromptsAfter: null);
     }
 
     internal FeatureResult ProcessNonPrebuildFeatures(List<Prompt> prompts)
@@ -308,7 +309,8 @@ internal class ProjectLogic(
             }
         }
 
-        return new FeatureResult(AnyFeatureProcessed: anyFeatureExecuted);
+        return new FeatureResult(
+            AnyFeatureProcessed: anyFeatureExecuted, GotoPromptsAfter: null);
     }
 
     internal static ProjectModel ReadProjectJsonFromStdin()

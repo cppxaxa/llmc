@@ -1,5 +1,5 @@
 ﻿using CSharpReplLib;
-using Newtonsoft.Json;
+using llmc.Storage;
 using System.Reflection;
 
 namespace llmc.Repl;
@@ -8,17 +8,29 @@ internal class CSharpRepl
 {
     public ScriptResult Execute(
         string parentDirectory, string script,
+        IStorage storage,
         List<(string, object)> globals,
         List<Assembly> assemblies,
         List<string> usings)
     {
+        string currentDirectoryBackup = Environment.CurrentDirectory;
+        Environment.CurrentDirectory = parentDirectory;
+
         ScriptHandler scriptHandler = new();
 
         scriptHandler = scriptHandler
             .AddReferences(typeof(string).Assembly, includeReferencedAssemblies: true)
             .AddReferences(Assembly.GetExecutingAssembly(), includeReferencedAssemblies: true)
-            .AddUsings("System", "System.Text", "System.IO", "System.Linq");
-        // scriptHandler = scriptHandler.AddGlobals((nameof(Storage) + "1", Storage));
+            .AddUsings(
+                "System", "System.Text", "System.IO", "System.Linq",
+                "llmc.Storage", "System.Math", "System.Collections.Generic",
+                "Newtonsoft.Json", "Newtonsoft.Json.Linq");
+        
+        scriptHandler = scriptHandler.AddGlobals((nameof(Storage), storage));
+
+        assemblies ??= new();
+        assemblies.Add(typeof(string).Assembly);
+        assemblies.Add(Assembly.GetExecutingAssembly());
 
         // Add assemblies.
         foreach (var assembly in assemblies)
@@ -62,6 +74,8 @@ internal class CSharpRepl
         scriptResultString = scriptResultString[^1] == '"'
             ? scriptResultString.Substring(0, scriptResultString.Length - 1)
             : scriptResultString;
+
+        Environment.CurrentDirectory = currentDirectoryBackup;
 
         return new ScriptResult(
             scriptResultString,

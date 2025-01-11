@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace llmc.Storage
 {
-    internal class SwitchableStorage(
+    public class SwitchableStorage(
         StorageConfiguration storageConfiguration,
         Dictionary<string, string>? inMemoryParam = null) : IStorage
     {

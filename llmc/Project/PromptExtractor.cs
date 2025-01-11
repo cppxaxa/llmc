@@ -6,7 +6,7 @@ namespace llmc.Project;
 
 internal class PromptExtractor
 {
-    internal Prompt Extract(string rawPrompt)
+    internal Prompt Extract(string filename, string rawPrompt)
     {
         string newLineSeparator = Common.FindLineSeparator(rawPrompt);
         List<string> separators = [];
@@ -97,6 +97,7 @@ internal class PromptExtractor
             EnableInMemoryStorage: flags.Contains(Flag.EnableInMemoryStorage));
 
         return new Prompt(
+            filename: filename,
             text: sections.LastOrDefault(string.Empty), metadataYaml: metadataYaml,
             preBuild: preBuild, features: features, postBuild: postBuild,
             flags: flags, storageConfiguration: storageConfiguration, metadata: metadata);

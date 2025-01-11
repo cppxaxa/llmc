@@ -165,11 +165,15 @@ if (projectLogic.CheckForCleanup(projectPath))
     return;
 }
 
-var prompts = projectLogic.ReadPrompts(disableInMemoryStorage: disableInMemoryStorage);
+var prompts = projectLogic.ReadPrompts(disableInMemoryStorage: disableInMemoryStorage)
+    .OrderBy(e => e.Filename).ToList();
+
+int promptIdx = 0;
 
 // Handle each prompt separately.
-foreach (var prompt in prompts)
+while (promptIdx < prompts.Count)
 {
+    Prompt prompt = prompts[promptIdx];
     List<Prompt> unitPrompts = [prompt];
 
     projectLogic.ProcessPrebuildFeatures(unitPrompts);
@@ -181,6 +185,22 @@ foreach (var prompt in prompts)
     }
 
     var processFeatures = projectLogic.ProcessNonPrebuildFeatures(unitPrompts);
+
+    // Handle going back to retry prompts.
+    if (!string.IsNullOrEmpty(processFeatures.GotoPromptsAfter))
+    {
+        // Find the prompt index.
+        var remainderPrompts = prompts.Select((e, i) => (e, i))
+            .Where(e => e.e.Filename.CompareTo(processFeatures.GotoPromptsAfter) >= 0);
+
+        if (remainderPrompts.Any())
+        {
+            promptIdx = remainderPrompts.First().i;
+            continue;
+        }
+
+        break;
+    }
 
     string undoContent = string.Empty;
 
@@ -208,11 +228,15 @@ foreach (var prompt in prompts)
 
         storage.WriteAllText(Path.Join(projectPath, "undo.executor.txt"), undoContent);
     }
+
+    // Increment prompt index.
+    promptIdx++;
 }
 
 /* TODO:
- * [x] ConsoleWriteline tag support
  * [ ] Retry support, based on acceptance C# logic
+ * [ ] VectorizeVanilla should support updates to vector documents
+ * [ ] Make hybrid search with json key as csv
  * [ ] C# library integrator with LLM callbacks, projectJson input, and consoleoutput
  * 
  * [ ] Graph representation of whole project
