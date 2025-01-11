@@ -199,14 +199,15 @@ internal class ProjectLogic(
         }
     }
 
-    public bool InvokeFeature(
+    public FeatureResult InvokeFeature(
         string parentPath, IFeature feature,
         ExecutorFinderResult finderResult)
     {
         Console.WriteLine($"Executing {finderResult.ClassName} with param {finderResult.Param}");
-        feature.Execute(parentPath, finderResult.Param);
 
-        return true;
+        FeatureResult featureResult = feature.Execute(parentPath, finderResult.Param);
+
+        return featureResult;
     }
 
     public static ProjectModel? ReadProjectJson(IStorage storage, string directory)
@@ -251,9 +252,10 @@ internal class ProjectLogic(
         return File.Exists(Path.Join(projectPath, "cleanup.executor.txt"));
     }
 
-    internal FeatureResult ProcessPrebuildFeatures(List<Prompt> prompts)
+    internal MultipleFeatureResult ProcessPrebuildFeatures(List<Prompt> prompts)
     {
         bool anyFeatureExecuted = false;
+        List<string> fileNames = [];
 
         // Support features.
         foreach (var prompt in prompts)
@@ -272,19 +274,29 @@ internal class ProjectLogic(
                             continue;
                         }
                         
-                        anyFeatureExecuted |= InvokeFeature(parentPath, feature, finderResult);
+                        var featureResult = InvokeFeature(parentPath, feature, finderResult);
+
+                        anyFeatureExecuted |= featureResult.Executed;
+
+                        if (!string.IsNullOrEmpty(featureResult.GotoPromptsAfter))
+                        {
+                            fileNames.Add(featureResult.GotoPromptsAfter);
+                        }
                     }
                 }
             }
         }
 
-        return new FeatureResult(
-            AnyFeatureProcessed: anyFeatureExecuted, GotoPromptsAfter: null);
+        string? gotoPromptsAfter = fileNames.Count > 0 ? fileNames.Min() : null;
+
+        return new MultipleFeatureResult(
+            AnyFeatureProcessed: anyFeatureExecuted, GotoPromptsAfter: gotoPromptsAfter);
     }
 
-    internal FeatureResult ProcessNonPrebuildFeatures(List<Prompt> prompts)
+    internal MultipleFeatureResult ProcessNonPrebuildFeatures(List<Prompt> prompts)
     {
         bool anyFeatureExecuted = false;
+        List<string> fileNames = [];
 
         // Support features.
         foreach (var prompt in prompts)
@@ -303,14 +315,24 @@ internal class ProjectLogic(
                             continue;
                         }
 
-                        anyFeatureExecuted |= InvokeFeature(parentPath, feature, finderResult);
+                        var featureResult = InvokeFeature(
+                            parentPath, feature, finderResult);
+
+                        anyFeatureExecuted |= featureResult.Executed;
+
+                        if (!string.IsNullOrEmpty(featureResult.GotoPromptsAfter))
+                        {
+                            fileNames.Add(featureResult.GotoPromptsAfter);
+                        }
                     }
                 }
             }
         }
 
-        return new FeatureResult(
-            AnyFeatureProcessed: anyFeatureExecuted, GotoPromptsAfter: null);
+        string? gotoPromptsAfter = fileNames.Count > 0 ? fileNames.Min() : null;
+
+        return new MultipleFeatureResult(
+            AnyFeatureProcessed: anyFeatureExecuted, GotoPromptsAfter: gotoPromptsAfter);
     }
 
     internal static ProjectModel ReadProjectJsonFromStdin()

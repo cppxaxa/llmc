@@ -10,7 +10,7 @@ namespace llmc.Features;
 
 internal class Rewrite100 : FeatureCommon
 {
-    public override void Execute(string parentDirectory, string param)
+    public override FeatureResult Execute(string parentDirectory, string param)
     {
         Console.WriteLine("Executing feature Rewrite100: " + param);
 
@@ -102,6 +102,8 @@ internal class Rewrite100 : FeatureCommon
                 Storage.WriteAllText(Path.Join(parentDirectory, fileNames[i]), rawFileContent);
             }
         }
+
+        return new FeatureResult();
     }
 
     private string GetRawFileContent(string filename, string contentToParse)

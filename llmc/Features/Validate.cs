@@ -10,7 +10,7 @@ internal class Validate : FeatureCommon
 {
     public override bool AsPrebuild => false;
 
-    public override void Execute(string parentDirectory, string param)
+    public override FeatureResult Execute(string parentDirectory, string param)
     {
         Console.WriteLine("Executing feature Validate: " + param);
 
@@ -39,7 +39,25 @@ internal class Validate : FeatureCommon
             [],
             []);
 
-        Console.WriteLine("Result: " + result.Result);
-        Console.WriteLine("IsError: " + result.IsError);
+        if (VerboseLogging)
+        {
+            Console.WriteLine("Result: " + result.Result);
+            Console.WriteLine("IsError: " + result.IsError);
+        }
+
+        string? gotoPromptsAfter = null;
+
+        if (bool.TryParse(result.Result, out bool isResultError) && !isResultError)
+        {
+            gotoPromptsAfter = errorgoto;
+        }
+        else if (result.IsError)
+        {
+            gotoPromptsAfter = errorgoto;
+        }
+
+        Console.WriteLine($"Validate:GotoPromptsAfter: {gotoPromptsAfter}");
+
+        return new FeatureResult(GotoPromptsAfter: gotoPromptsAfter);
     }
 }

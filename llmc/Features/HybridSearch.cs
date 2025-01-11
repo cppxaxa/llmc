@@ -15,7 +15,7 @@ internal class HybridSearch : FeatureCommon
     private List<(float[] Vector, string Label)> _vectorCollection = [];
     private List<(string, int)> _searchTextCollection = [];  
 
-    public override void Execute(string parentDirectory, string param)
+    public override FeatureResult Execute(string parentDirectory, string param)
     {
         Console.WriteLine("Executing feature HybridSearch: " + param);
 
@@ -69,7 +69,8 @@ internal class HybridSearch : FeatureCommon
 
         string simplerQueryInPlainText = Common.RemoveCodeAnnotations(simplerQuery);
 
-        List<string> brokenPromptList = BreakPrompts(simplerQueryInPlainText, slidingwordsize, slidingwordoverlap);
+        List<string> brokenPromptList = BreakPrompts(
+            simplerQueryInPlainText, slidingwordsize, slidingwordoverlap);
 
         HashSet<string> searchResult = new();
 
@@ -139,6 +140,8 @@ internal class HybridSearch : FeatureCommon
         ExecutorInvoker.Clone().ChangeStorage(Storage).Invoke(
             parentDirectory, new ExecutorFinderResult(
                 "AppendUndo", $"dump={JsonConvert.SerializeObject(undo.ToString())}"));
+
+        return new FeatureResult();
     }
 
     private string GetSimplerQueryWithLlm(string promptText, HashSet<string> tokens)
@@ -152,7 +155,8 @@ internal class HybridSearch : FeatureCommon
             $"Assistant: The new query in code annotations is below.\n");
     }
 
-    private static HashSet<string> GetSearchTextTokens(string promptText, HashSet<string> stopWords)
+    private static HashSet<string> GetSearchTextTokens(
+        string promptText, HashSet<string> stopWords)
     {
 
         // Split, clean, and filter tokens
@@ -213,17 +217,20 @@ internal class HybridSearch : FeatureCommon
         // Validations.
         if (slidingWordOverlap < 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(slidingwordoverlapStr), "Must be greater than 0");
+            throw new ArgumentOutOfRangeException(
+                nameof(slidingwordoverlapStr), "Must be greater than 0");
         }
 
         if (slidingWordSize < 1)
         {
-            throw new ArgumentOutOfRangeException(nameof(slidingwordsizeStr), "Must be greater than 0");
+            throw new ArgumentOutOfRangeException(
+                nameof(slidingwordsizeStr), "Must be greater than 0");
         }
 
         if (slidingWordOverlap > slidingWordSize)
         {
-            throw new ArgumentException("Must be less than slidingWordSize", nameof(slidingwordoverlapStr));
+            throw new ArgumentException(
+                "Must be less than slidingWordSize", nameof(slidingwordoverlapStr));
         }
 
         string[] tokens = promptText.Split(' ');

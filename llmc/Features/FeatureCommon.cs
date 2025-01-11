@@ -22,6 +22,6 @@ internal abstract class FeatureCommon : IFeature
 
     public virtual bool AsPrebuild { get; set; } = false;
 
-    abstract public void Execute(
+    abstract public FeatureResult Execute(
         string parentDirectory, string param);
 }

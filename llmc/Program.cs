@@ -170,6 +170,8 @@ var prompts = projectLogic.ReadPrompts(disableInMemoryStorage: disableInMemorySt
 
 int promptIdx = 0;
 
+Dictionary<string, int> retryLimit = [];
+
 // Handle each prompt separately.
 while (promptIdx < prompts.Count)
 {
@@ -184,27 +186,43 @@ while (promptIdx < prompts.Count)
         projectLogic.PreProcess(prompt, promptString);
     }
 
-    var processFeatures = projectLogic.ProcessNonPrebuildFeatures(unitPrompts);
+    var featureResults = projectLogic.ProcessNonPrebuildFeatures(unitPrompts);
 
     // Handle going back to retry prompts.
-    if (!string.IsNullOrEmpty(processFeatures.GotoPromptsAfter))
+    if (!string.IsNullOrEmpty(featureResults.GotoPromptsAfter))
     {
+        if (!retryLimit.ContainsKey(featureResults.GotoPromptsAfter))
+        {
+            retryLimit[featureResults.GotoPromptsAfter] = 3;
+        }
+        else if (retryLimit[featureResults.GotoPromptsAfter] == 0)
+        {
+            throw new Exception(
+                $"llmc:Retry limit reached for prompt: {featureResults.GotoPromptsAfter}");
+        }
+
         // Find the prompt index.
         var remainderPrompts = prompts.Select((e, i) => (e, i))
-            .Where(e => e.e.Filename.CompareTo(processFeatures.GotoPromptsAfter) >= 0);
+            .Where(e => e.e.Filename.CompareTo(featureResults.GotoPromptsAfter) >= 0);
 
         if (remainderPrompts.Any())
         {
             promptIdx = remainderPrompts.First().i;
+            Console.WriteLine($"GotoPrompt: {prompts[promptIdx].Filename}");
+
+            retryLimit[featureResults.GotoPromptsAfter] -= 1;
+            Console.WriteLine($"llmc:Retry limit remaining: {retryLimit[featureResults.GotoPromptsAfter]}");
+
             continue;
         }
 
+        Console.WriteLine($"GotoPrompt failed: {featureResults.GotoPromptsAfter}");
         break;
     }
 
     string undoContent = string.Empty;
 
-    if (!processFeatures.AnyFeatureProcessed)
+    if (!featureResults.AnyFeatureProcessed)
     {
         var llmResults = projectLogic.GetLlmResults(unitPrompts);
 

@@ -9,7 +9,7 @@ internal class Transform : FeatureCommon
 {
     public override bool AsPrebuild => false;
 
-    public override void Execute(string parentDirectory, string param)
+    public override FeatureResult Execute(string parentDirectory, string param)
     {
         Console.WriteLine("Executing feature Transform: " + param);
 
@@ -54,6 +54,8 @@ internal class Transform : FeatureCommon
             // Save.
             SaveOutput(fpath, result, parentDirectory, outputpath, outputfile, outputappendfile);
         }
+
+        return new FeatureResult();
     }
 
     private void SaveOutput(

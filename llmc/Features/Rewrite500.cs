@@ -10,7 +10,7 @@ namespace llmc.Features;
 
 internal class Rewrite500 : FeatureCommon
 {
-    public override void Execute(string parentDirectory, string param)
+    public override FeatureResult Execute(string parentDirectory, string param)
     {
         Console.WriteLine("Executing feature Rewrite500: " + param);
 
@@ -115,7 +115,6 @@ internal class Rewrite500 : FeatureCommon
             }
         }
 
-
         // Undo redaction.
         foreach (var i in fileIndexToUndoRedaction)
         {
@@ -123,6 +122,8 @@ internal class Rewrite500 : FeatureCommon
                 ExecutorInvoker.Clone().ChangeStorage(Storage)).Undo(
                 parentDirectory, fileNames[i]);
         }
+
+        return new FeatureResult();
     }
 
     private string GetRawFileContent(string filename, string contentToParse)

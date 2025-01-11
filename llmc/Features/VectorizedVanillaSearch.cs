@@ -9,7 +9,7 @@ internal class VectorizedVanillaSearch : FeatureCommon
 {
     public override bool AsPrebuild => true;
 
-    public override void Execute(string parentDirectory, string param)
+    public override FeatureResult Execute(string parentDirectory, string param)
     {
         Console.WriteLine("Executing feature VectorizedVanillaSearch: " + param);
 
@@ -105,6 +105,8 @@ internal class VectorizedVanillaSearch : FeatureCommon
         ExecutorInvoker.Clone().ChangeStorage(Storage).Invoke(
             parentDirectory, new ExecutorFinderResult(
                 "AppendUndo", $"dump={JsonConvert.SerializeObject(undo.ToString())}"));
+
+        return new FeatureResult();
     }
 
     private List<string> BreakPrompts(

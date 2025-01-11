@@ -30,5 +30,5 @@ internal interface IFeature
     IStorage? Storage { get; set; }
 
     // Returns command to undo.
-    void Execute(string parentDirectory, string param);
+    FeatureResult Execute(string parentDirectory, string param);
 }
