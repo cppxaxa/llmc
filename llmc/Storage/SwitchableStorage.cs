@@ -8,475 +8,478 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace llmc.Storage
+namespace llmc.Storage;
+
+/// <summary>
+/// TODO Bug: If we move a directory/ copy a directory, and given some files exists in the memory,
+/// the extra existing files won't get deleted. Overwrite and create will work fine.
+/// </summary>
+public class SwitchableStorage(
+    StorageConfiguration storageConfiguration,
+    Dictionary<string, string>? inMemoryParam = null) : IStorage
 {
-    public class SwitchableStorage(
-        StorageConfiguration storageConfiguration,
-        Dictionary<string, string>? inMemoryParam = null) : IStorage
+    private readonly Dictionary<string, string> inMemory = inMemoryParam ?? [];
+
+    private static string GetPath(string path)
     {
-        private readonly Dictionary<string, string> inMemory = inMemoryParam ?? [];
+        return Path.GetFullPath(path);
+    }
 
-        private static string GetPath(string path)
+    public IStorage Clone()
+    {
+        return new SwitchableStorage(storageConfiguration, inMemory);
+    }
+
+    public IStorage ApplyConfiguration(StorageConfiguration configuration)
+    {
+        storageConfiguration = configuration;
+        return this;
+    }
+
+    public void AppendAllText(string path, string content)
+    {
+        path = GetPath(path);
+
+        if (storageConfiguration.EnableInMemoryStorage)
         {
-            return Path.GetFullPath(path);
+            if (!inMemory.ContainsKey(path))
+            {
+                inMemory[path] = string.Empty;
+            }
+
+            inMemory[path] = inMemory[path] + content;
         }
-
-        public IStorage Clone()
+        else
         {
-            return new SwitchableStorage(storageConfiguration, inMemory);
+            File.AppendAllText(path, content);
         }
+    }
 
-        public IStorage ApplyConfiguration(StorageConfiguration configuration)
+    public void AppendAllLines(string path, IEnumerable<string> lines)
+    {
+        path = GetPath(path);
+
+        if (storageConfiguration.EnableInMemoryStorage)
         {
-            storageConfiguration = configuration;
-            return this;
+            string joined = string.Join(Environment.NewLine, lines);
+
+            if (!inMemory.ContainsKey(path))
+            {
+                inMemory[path] = string.Empty;
+            }
+
+            inMemory[path] = inMemory[path] + joined;
         }
-
-        public void AppendAllText(string path, string content)
+        else
         {
-            path = GetPath(path);
-
-            if (storageConfiguration.EnableInMemoryStorage)
-            {
-                if (!inMemory.ContainsKey(path))
-                {
-                    inMemory[path] = string.Empty;
-                }
-
-                inMemory[path] = inMemory[path] + content;
-            }
-            else
-            {
-                File.AppendAllText(path, content);
-            }
+            File.AppendAllLines(path, lines);
         }
+    }
 
-        public void AppendAllLines(string path, IEnumerable<string> lines)
+    public void CreateDirectory(string path)
+    {
+        path = GetPath(path);
+
+        if (storageConfiguration.EnableInMemoryStorage)
         {
-            path = GetPath(path);
-
-            if (storageConfiguration.EnableInMemoryStorage)
-            {
-                string joined = string.Join(Environment.NewLine, lines);
-
-                if (!inMemory.ContainsKey(path))
-                {
-                    inMemory[path] = string.Empty;
-                }
-
-                inMemory[path] = inMemory[path] + joined;
-            }
-            else
-            {
-                File.AppendAllLines(path, lines);
-            }
+            // Do nothing
         }
-
-        public void CreateDirectory(string path)
+        else
         {
-            path = GetPath(path);
-
-            if (storageConfiguration.EnableInMemoryStorage)
-            {
-                // Do nothing
-            }
-            else
-            {
-                Directory.CreateDirectory(path);
-            }
+            Directory.CreateDirectory(path);
         }
+    }
 
-        public void Delete(string path)
+    public void Delete(string path)
+    {
+        path = GetPath(path);
+
+        if (storageConfiguration.EnableInMemoryStorage)
         {
-            path = GetPath(path);
-
-            if (storageConfiguration.EnableInMemoryStorage)
-            {
-                inMemory.Remove(path);
-            }
-            else
-            {
-                File.Delete(path);
-            }
+            inMemory.Remove(path);
         }
-
-        public void DeleteDirectory(string path, bool recursive)
+        else
         {
-            path = GetPath(path);
+            File.Delete(path);
+        }
+    }
 
-            if (storageConfiguration.EnableInMemoryStorage)
+    public void DeleteDirectory(string path, bool recursive)
+    {
+        path = GetPath(path);
+
+        if (storageConfiguration.EnableInMemoryStorage)
+        {
+            foreach (var key in inMemory.Keys.Where(k => k.StartsWith(path)).ToArray())
             {
-                foreach (var key in inMemory.Keys.Where(k => k.StartsWith(path)).ToArray())
-                {
-                    inMemory.Remove(key);
-                }
-            }
-            else
-            {
-                Directory.Delete(path, recursive);
+                inMemory.Remove(key);
             }
         }
-
-        public IEnumerable<string> EnumerateFiles(
-            string path, string wildcard, SearchOption searchOption)
+        else
         {
-            path = GetPath(path);
-            char pathSeparator = GetPathSeparator(path);
+            Directory.Delete(path, recursive);
+        }
+    }
 
-            IEnumerable<string> localFiles = [];
+    public IEnumerable<string> EnumerateFiles(
+        string path, string wildcard, SearchOption searchOption)
+    {
+        path = GetPath(path);
+        char pathSeparator = GetPathSeparator(path);
 
-            if (Path.Exists(path))
-            {
-                localFiles = Directory.EnumerateFiles(path, wildcard, searchOption);
-            }
+        IEnumerable<string> localFiles = [];
 
-            if (storageConfiguration.EnableInMemoryStorage)
-            {
-                if (searchOption == SearchOption.AllDirectories)
-                {
-                    return inMemory.Keys.Where(k => k.StartsWith(path + pathSeparator) &&
-                        Common.IsWildcardMatch(Path.GetFileName(k), wildcard))
-                        .Union(localFiles).ToList();
-                }
-                else if (searchOption == SearchOption.TopDirectoryOnly)
-                {
-                    return inMemory.Keys.Where(k =>
-                        k == Path.Join(path, Path.GetFileName(k)) &&
-                        Common.IsWildcardMatch(Path.GetFileName(k), wildcard))
-                        .Union(localFiles).ToList();
-                }
-                else
-                {
-                    throw new NotImplementedException("SwitchableStorage:EnumerateFiles:SearchOption");
-                }
-            }
-            else
-            {
-                return localFiles;
-            }
+        if (Path.Exists(path))
+        {
+            localFiles = Directory.EnumerateFiles(path, wildcard, searchOption);
         }
 
-        private static char GetPathSeparator(string path)
+        if (storageConfiguration.EnableInMemoryStorage)
         {
-            string dummyDirectoryName = "dummy";
-            string p = GetPath(Path.Join(path, dummyDirectoryName));
-            return p.Substring(path.Length)[0];
-        }
-
-        public IEnumerable<string> EnumerateFiles(string path, string wildcard)
-        {
-            path = GetPath(path);
-
-            IEnumerable<string> localFiles = [];
-
-            if (Path.Exists(path))
+            if (searchOption == SearchOption.AllDirectories)
             {
-                localFiles = Directory.EnumerateFiles(path, wildcard);
+                return inMemory.Keys.Where(k => k.StartsWith(path + pathSeparator) &&
+                    Common.IsWildcardMatch(Path.GetFileName(k), wildcard))
+                    .Union(localFiles).ToList();
             }
-
-            if (storageConfiguration.EnableInMemoryStorage)
+            else if (searchOption == SearchOption.TopDirectoryOnly)
             {
                 return inMemory.Keys.Where(k =>
                     k == Path.Join(path, Path.GetFileName(k)) &&
-                    Common.IsWildcardMatch(Path.GetFileName(k), wildcard)).Union(localFiles)
-                    .ToList();
+                    Common.IsWildcardMatch(Path.GetFileName(k), wildcard))
+                    .Union(localFiles).ToList();
             }
             else
             {
-                return localFiles;
+                throw new NotImplementedException("SwitchableStorage:EnumerateFiles:SearchOption");
             }
         }
-
-        public IEnumerable<string> EnumerateFiles(string path)
+        else
         {
-            path = GetPath(path);
+            return localFiles;
+        }
+    }
 
-            IEnumerable<string> localFiles = [];
+    private static char GetPathSeparator(string path)
+    {
+        string dummyDirectoryName = "dummy";
+        string p = GetPath(Path.Join(path, dummyDirectoryName));
+        return p.Substring(path.Length)[0];
+    }
 
-            if (Path.Exists(path))
+    public IEnumerable<string> EnumerateFiles(string path, string wildcard)
+    {
+        path = GetPath(path);
+
+        IEnumerable<string> localFiles = [];
+
+        if (Path.Exists(path))
+        {
+            localFiles = Directory.EnumerateFiles(path, wildcard);
+        }
+
+        if (storageConfiguration.EnableInMemoryStorage)
+        {
+            return inMemory.Keys.Where(k =>
+                k == Path.Join(path, Path.GetFileName(k)) &&
+                Common.IsWildcardMatch(Path.GetFileName(k), wildcard)).Union(localFiles)
+                .ToList();
+        }
+        else
+        {
+            return localFiles;
+        }
+    }
+
+    public IEnumerable<string> EnumerateFiles(string path)
+    {
+        path = GetPath(path);
+
+        IEnumerable<string> localFiles = [];
+
+        if (Path.Exists(path))
+        {
+            localFiles = Directory.EnumerateFiles(path);
+        }
+
+        if (storageConfiguration.EnableInMemoryStorage)
+        {
+            return inMemory.Keys.Where(k =>
+                k == Path.Join(path, Path.GetFileName(k))).Union(localFiles)
+                .ToList();
+        }
+        else
+        {
+            return localFiles;
+        }
+    }
+
+    public bool Exists(string? path)
+    {
+        if (string.IsNullOrEmpty(path)) return false;
+
+        path = GetPath(path);
+
+        bool localPathExists = File.Exists(path) || Directory.Exists(path);
+
+        if (storageConfiguration.EnableInMemoryStorage)
+        {
+            return inMemory.ContainsKey(path) || localPathExists;
+        }
+        else
+        {
+            return localPathExists;
+        }
+    }
+
+    public string[] GetFiles(string path, string wildcard)
+    {
+        path = GetPath(path);
+
+        string[] localFiles = [];
+
+        if (Path.Exists(path))
+        {
+            localFiles = Directory.GetFiles(path, wildcard);
+        }
+
+        if (storageConfiguration.EnableInMemoryStorage)
+        {
+            return inMemory.Keys
+                .Where(k => k == Path.Join(path, Path.GetFileName(k)) &&
+                    Common.IsWildcardMatch(Path.GetFileName(k), wildcard))
+                .Union(localFiles).ToArray();
+        }
+        else
+        {
+            return localFiles;
+        }
+    }
+
+    public string[] GetFiles(string path)
+    {
+        path = GetPath(path);
+
+        string[] localFiles = [];
+
+        if (Path.Exists(path))
+        {
+            localFiles = Directory.GetFiles(path);
+        }
+
+        if (storageConfiguration.EnableInMemoryStorage)
+        {
+            return inMemory.Keys.Where(k =>
+                k == Path.Join(path, Path.GetFileName(k))).Union(localFiles).ToArray();
+        }
+        else
+        {
+            return localFiles;
+        }
+    }
+
+    public void Move(string sourcePath, string destinationPath)
+    {
+        sourcePath = GetPath(sourcePath);
+        destinationPath = GetPath(destinationPath);
+
+        if (storageConfiguration.EnableInMemoryStorage)
+        {
+            if (inMemory.ContainsKey(sourcePath))
             {
-                localFiles = Directory.EnumerateFiles(path);
-            }
-
-            if (storageConfiguration.EnableInMemoryStorage)
-            {
-                return inMemory.Keys.Where(k =>
-                    k == Path.Join(path, Path.GetFileName(k))).Union(localFiles)
-                    .ToList();
+                inMemory[destinationPath] = inMemory[sourcePath];
+                inMemory.Remove(sourcePath);
             }
             else
             {
-                return localFiles;
+                inMemory[destinationPath] = File.ReadAllText(sourcePath);
             }
         }
-
-        public bool Exists(string? path)
+        else
         {
-            if (string.IsNullOrEmpty(path)) return false;
-
-            path = GetPath(path);
-
-            bool localPathExists = File.Exists(path) || Directory.Exists(path);
-
-            if (storageConfiguration.EnableInMemoryStorage)
-            {
-                return inMemory.ContainsKey(path) || localPathExists;
-            }
-            else
-            {
-                return localPathExists;
-            }
+            File.Move(sourcePath, destinationPath);
         }
+    }
 
-        public string[] GetFiles(string path, string wildcard)
+    public void MoveDirectory(string sourcePath, string destinationPath)
+    {
+        sourcePath = GetPath(sourcePath);
+        destinationPath = GetPath(destinationPath);
+
+        if (storageConfiguration.EnableInMemoryStorage)
         {
-            path = GetPath(path);
-
-            string[] localFiles = [];
-
-            if (Path.Exists(path))
+            foreach (var key in inMemory.Keys.Where(k => k.StartsWith(sourcePath)).ToArray())
             {
-                localFiles = Directory.GetFiles(path, wildcard);
+                string newKey = key.Replace(sourcePath, destinationPath);
+                inMemory[newKey] = inMemory[key];
+                inMemory.Remove(key);
             }
 
-            if (storageConfiguration.EnableInMemoryStorage)
+            // Put any missing files from local source.
+            foreach (var filename in Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories))
             {
-                return inMemory.Keys
-                    .Where(k => k == Path.Join(path, Path.GetFileName(k)) &&
-                        Common.IsWildcardMatch(Path.GetFileName(k), wildcard))
-                    .Union(localFiles).ToArray();
-            }
-            else
-            {
-                return localFiles;
-            }
-        }
-
-        public string[] GetFiles(string path)
-        {
-            path = GetPath(path);
-
-            string[] localFiles = [];
-
-            if (Path.Exists(path))
-            {
-                localFiles = Directory.GetFiles(path);
-            }
-
-            if (storageConfiguration.EnableInMemoryStorage)
-            {
-                return inMemory.Keys.Where(k =>
-                    k == Path.Join(path, Path.GetFileName(k))).Union(localFiles).ToArray();
-            }
-            else
-            {
-                return localFiles;
-            }
-        }
-
-        public void Move(string sourcePath, string destinationPath)
-        {
-            sourcePath = GetPath(sourcePath);
-            destinationPath = GetPath(destinationPath);
-
-            if (storageConfiguration.EnableInMemoryStorage)
-            {
-                if (inMemory.ContainsKey(sourcePath))
+                if (!inMemory.ContainsKey(filename))
                 {
-                    inMemory[destinationPath] = inMemory[sourcePath];
-                    inMemory.Remove(sourcePath);
+                    inMemory[filename.Replace(sourcePath, destinationPath)] = File
+                        .ReadAllText(filename);
                 }
-                else
-                {
-                    inMemory[destinationPath] = File.ReadAllText(sourcePath);
-                }
-            }
-            else
-            {
-                File.Move(sourcePath, destinationPath);
             }
         }
-
-        public void MoveDirectory(string sourcePath, string destinationPath)
+        else
         {
-            sourcePath = GetPath(sourcePath);
-            destinationPath = GetPath(destinationPath);
-
-            if (storageConfiguration.EnableInMemoryStorage)
-            {
-                foreach (var key in inMemory.Keys.Where(k => k.StartsWith(sourcePath)).ToArray())
-                {
-                    string newKey = key.Replace(sourcePath, destinationPath);
-                    inMemory[newKey] = inMemory[key];
-                    inMemory.Remove(key);
-                }
-
-                // Put any missing files from local source.
-                foreach (var filename in Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories))
-                {
-                    if (!inMemory.ContainsKey(filename))
-                    {
-                        inMemory[filename.Replace(sourcePath, destinationPath)] = File
-                            .ReadAllText(filename);
-                    }
-                }
-            }
-            else
-            {
-                Directory.Move(sourcePath, destinationPath);
-            }
+            Directory.Move(sourcePath, destinationPath);
         }
+    }
 
-        public string[] ReadAllLines(string path)
+    public string[] ReadAllLines(string path)
+    {
+        path = GetPath(path);
+
+        if (storageConfiguration.EnableInMemoryStorage)
         {
-            path = GetPath(path);
-
-            if (storageConfiguration.EnableInMemoryStorage)
+            if (inMemory.ContainsKey(path))
             {
-                if (inMemory.ContainsKey(path))
-                {
-                    string separator = Common.FindLineSeparator(inMemory[path]);
-                    return inMemory[path].Split(separator);
-                }
-                else
-                {
-                    return File.ReadAllLines(path);
-                }
+                string separator = Common.FindLineSeparator(inMemory[path]);
+                return inMemory[path].Split(separator);
             }
             else
             {
                 return File.ReadAllLines(path);
             }
         }
-
-        public string ReadAllText(string path)
+        else
         {
-            path = GetPath(path);
+            return File.ReadAllLines(path);
+        }
+    }
 
-            if (storageConfiguration.EnableInMemoryStorage)
+    public string ReadAllText(string path)
+    {
+        path = GetPath(path);
+
+        if (storageConfiguration.EnableInMemoryStorage)
+        {
+            if (inMemory.ContainsKey(path))
             {
-                if (inMemory.ContainsKey(path))
-                {
-                    return inMemory[path];
-                }
-                else
-                {
-                    return File.ReadAllText(path);
-                }
+                return inMemory[path];
             }
             else
             {
                 return File.ReadAllText(path);
             }
         }
-
-        public string ReadAllText(string path, Encoding encoding)
+        else
         {
-            path = GetPath(path);
+            return File.ReadAllText(path);
+        }
+    }
 
-            if (storageConfiguration.EnableInMemoryStorage)
+    public string ReadAllText(string path, Encoding encoding)
+    {
+        path = GetPath(path);
+
+        if (storageConfiguration.EnableInMemoryStorage)
+        {
+            if (inMemory.ContainsKey(path))
             {
-                if (inMemory.ContainsKey(path))
-                {
-                    return encoding.GetString(Encoding.UTF8.GetBytes(inMemory[path]));
-                }
-                else
-                {
-                    return File.ReadAllText(path, encoding);
-                }
+                return encoding.GetString(Encoding.UTF8.GetBytes(inMemory[path]));
             }
             else
             {
                 return File.ReadAllText(path, encoding);
             }
         }
-
-        public void WriteAllLines(string path, IEnumerable<string> lines)
+        else
         {
-            path = GetPath(path);
+            return File.ReadAllText(path, encoding);
+        }
+    }
 
-            if (storageConfiguration.EnableInMemoryStorage)
+    public void WriteAllLines(string path, IEnumerable<string> lines)
+    {
+        path = GetPath(path);
+
+        if (storageConfiguration.EnableInMemoryStorage)
+        {
+            inMemory[path] = string.Join(Environment.NewLine, lines);
+        }
+        else
+        {
+            File.WriteAllLines(path, lines);
+        }
+    }
+
+    public void WriteAllText(string path, string content)
+    {
+        path = GetPath(path);
+
+        if (storageConfiguration.EnableInMemoryStorage)
+        {
+            inMemory[path] = content;
+        }
+        else
+        {
+            File.WriteAllText(path, content);
+        }
+    }
+
+    public void CopyDirectory(string sourcePath, string destinationPath)
+    {
+        sourcePath = GetPath(sourcePath);
+        destinationPath = GetPath(destinationPath);
+
+        if (storageConfiguration.EnableInMemoryStorage)
+        {
+            foreach (var key in inMemory.Keys.Where(k => k.StartsWith(sourcePath)).ToArray())
             {
-                inMemory[path] = string.Join(Environment.NewLine, lines);
+                string newKey = key.Replace(sourcePath, destinationPath);
+                inMemory[newKey] = inMemory[key];
             }
-            else
+
+            // Put any missing files from local source.
+            foreach (var filename in Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories))
             {
-                File.WriteAllLines(path, lines);
+                string newKey = filename.Replace(sourcePath, destinationPath);
+                
+                if (!inMemory.ContainsKey(newKey))
+                {
+                    inMemory[newKey] = File.ReadAllText(filename);
+                }
             }
         }
-
-        public void WriteAllText(string path, string content)
+        else
         {
-            path = GetPath(path);
-
-            if (storageConfiguration.EnableInMemoryStorage)
+            // If windows use robocopy, otherwise use rsync.
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                inMemory[path] = content;
+                ProcessStartInfo psi = new()
+                {
+                    FileName = "robocopy",
+                    Arguments = $"\"{sourcePath}\" \"{destinationPath}\" /E /Z /R:5 /W:5",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                };
+
+                Process proc = Process.Start(psi)!;
+                proc.WaitForExit();
             }
             else
             {
-                File.WriteAllText(path, content);
-            }
-        }
-
-        public void CopyDirectory(string sourcePath, string destinationPath)
-        {
-            sourcePath = GetPath(sourcePath);
-            destinationPath = GetPath(destinationPath);
-
-            if (storageConfiguration.EnableInMemoryStorage)
-            {
-                foreach (var key in inMemory.Keys.Where(k => k.StartsWith(sourcePath)).ToArray())
+                // Untested.
+                ProcessStartInfo psi = new()
                 {
-                    string newKey = key.Replace(sourcePath, destinationPath);
-                    inMemory[newKey] = inMemory[key];
-                }
+                    FileName = "rsync",
+                    Arguments = $"-a \"{sourcePath}\" \"{destinationPath}\"",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                };
 
-                // Put any missing files from local source.
-                foreach (var filename in Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories))
-                {
-                    string newKey = filename.Replace(sourcePath, destinationPath);
-                    
-                    if (!inMemory.ContainsKey(newKey))
-                    {
-                        inMemory[newKey] = File.ReadAllText(filename);
-                    }
-                }
-            }
-            else
-            {
-                // If windows use robocopy, otherwise use rsync.
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    ProcessStartInfo psi = new()
-                    {
-                        FileName = "robocopy",
-                        Arguments = $"\"{sourcePath}\" \"{destinationPath}\" /E /Z /R:5 /W:5",
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true
-                    };
-
-                    Process proc = Process.Start(psi)!;
-                    proc.WaitForExit();
-                }
-                else
-                {
-                    // Untested.
-                    ProcessStartInfo psi = new()
-                    {
-                        FileName = "rsync",
-                        Arguments = $"-a \"{sourcePath}\" \"{destinationPath}\"",
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true
-                    };
-
-                    Process proc = Process.Start(psi)!;
-                    proc.WaitForExit();
-                }
+                Process proc = Process.Start(psi)!;
+                proc.WaitForExit();
             }
         }
     }
