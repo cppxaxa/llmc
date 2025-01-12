@@ -15,5 +15,10 @@ I want you to fix the TODO in README.md with minimal changes.
 The filtered json are shortlisted json lines from pool of json mentioned in README.md
 based on the following user query
 "{{{chartquery}}}"
+The presets in filtered json have certain match criterias.
+All the combinations of keywords in the preset "value" must be considered unique,
+it means, "App-A App-C filter" != "Apps-A filter". Basically, don't do a substring match.
+It should a complete match.
+You should also match abbreviations, but ensure that there should be no surplus keywords remaining in value.
 The filtered json are exact subset of pool of json and remember to enclose with ```jsonl annotation.
 Give instructions to write README.md with new content.

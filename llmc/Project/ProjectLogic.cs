@@ -297,6 +297,7 @@ internal class ProjectLogic(
     {
         bool anyFeatureExecuted = false;
         List<string> fileNames = [];
+        int maxRetry = 0;
 
         // Support features.
         foreach (var prompt in prompts)
@@ -318,12 +319,15 @@ internal class ProjectLogic(
                         var featureResult = InvokeFeature(
                             parentPath, feature, finderResult);
 
+                        // Start parsing the result.
                         anyFeatureExecuted |= featureResult.Executed;
 
                         if (!string.IsNullOrEmpty(featureResult.GotoPromptsAfter))
                         {
                             fileNames.Add(featureResult.GotoPromptsAfter);
                         }
+
+                        maxRetry = Math.Max(maxRetry, featureResult.MaxRetry?.Value ?? 0);
                     }
                 }
             }
@@ -332,7 +336,8 @@ internal class ProjectLogic(
         string? gotoPromptsAfter = fileNames.Count > 0 ? fileNames.Min() : null;
 
         return new MultipleFeatureResult(
-            AnyFeatureProcessed: anyFeatureExecuted, GotoPromptsAfter: gotoPromptsAfter);
+            AnyFeatureProcessed: anyFeatureExecuted, GotoPromptsAfter: gotoPromptsAfter,
+            MaxRetry: maxRetry);
     }
 
     internal static ProjectModel ReadProjectJsonFromStdin()

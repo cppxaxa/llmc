@@ -21,6 +21,8 @@ internal class Validate : FeatureCommon
 
         Dictionary<string, string> p = Common.ParseParam(param);
         string? errorgoto = p.ContainsKey("errorgoto") ? p["errorgoto"] : null;
+        string? maxretry = p.ContainsKey("maxretry") ? p["maxretry"] : null;
+        int maxRetryValue = int.TryParse(maxretry, out int maxRetry) ? maxRetry : 0;
 
         string promptText = Prompt.Text;
 
@@ -58,6 +60,6 @@ internal class Validate : FeatureCommon
 
         Console.WriteLine($"Validate:GotoPromptsAfter: {gotoPromptsAfter}");
 
-        return new FeatureResult(GotoPromptsAfter: gotoPromptsAfter);
+        return new FeatureResult(GotoPromptsAfter: gotoPromptsAfter, MaxRetry: maxRetryValue);
     }
 }

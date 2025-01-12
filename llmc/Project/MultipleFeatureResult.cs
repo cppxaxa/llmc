@@ -2,4 +2,5 @@
 
 internal record MultipleFeatureResult(
     bool AnyFeatureProcessed,
-    string? GotoPromptsAfter);
+    string? GotoPromptsAfter,
+    int? MaxRetry);

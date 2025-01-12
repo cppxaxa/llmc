@@ -193,7 +193,7 @@ while (promptIdx < prompts.Count)
     {
         if (!retryLimit.ContainsKey(featureResults.GotoPromptsAfter))
         {
-            retryLimit[featureResults.GotoPromptsAfter] = 3;
+            retryLimit[featureResults.GotoPromptsAfter] = featureResults.MaxRetry ?? 0;
         }
         else if (retryLimit[featureResults.GotoPromptsAfter] == 0)
         {
