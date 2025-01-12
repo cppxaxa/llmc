@@ -65,7 +65,7 @@ string projectJson = JsonConvert.SerializeObject(new
 
 string[] projectCwdList = [
     "C:\\B\\L1\\llmc\\playground\\project-presetsearch_real",
-    //"C:\\B\\L1\\llmc\\playground\\project-dimensionsearch_real",
+    "C:\\B\\L1\\llmc\\playground\\project-dimensionsearch_real",
 ];
 
 ConsoleColor color;

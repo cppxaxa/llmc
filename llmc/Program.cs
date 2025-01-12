@@ -252,10 +252,10 @@ while (promptIdx < prompts.Count)
 }
 
 /* TODO:
- * [ ] Retry support, based on acceptance C# logic
+ * [ ] TODO Bug: If we move a directory/ copy a directory, and given some files exists in
+ * the memory, the extra existing files won't get deleted. Overwrite and create will work fine.
  * [ ] VectorizeVanilla should support updates to vector documents
  * [ ] Make hybrid search with json key as csv
- * [ ] C# library integrator with LLM callbacks, projectJson input, and consoleoutput
  * 
  * [ ] Graph representation of whole project
  * [ ] Curl command template support with C# script parser
