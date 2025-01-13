@@ -1,0 +1,18 @@
+Features:
+- Rewrite100(repo="promptmodifier-test",wildcard="*.md")
+Flags:
+- EnableInMemoryStorage
+PreBuild:
+- DeleteFolder(folder="promptmodifier-test")
+- CopyFolder(source="promptmodifier",destination="promptmodifier-test")
+- ApplyMacros(folder="promptmodifier-test",wildcard="*.md")
+PostBuild:
+- MarkdownExtractor(input="promptmodifier-test/README.md",output="promptmodifier-test/extracted.txt",sectionsearch="User query without presets",removecodeannotation="true")
+- ConsoleWriteline(tag="user-prompt-without-presets",filename="promptmodifier-test/extracted.txt")
+---
+You are an intelligent natural language processor, powered by AI.
+I want you to fix the TODO in README.md with minimal changes.
+The user query without presets is a derived user prompt where it does not have preset keywords mentioned in README.md
+The user query without presets is a single line natural language prompt without the presets query or keywords.
+Remember to enclose user query without presets with ```plaintext annotation.
+Give instructions to write README.md with new content.

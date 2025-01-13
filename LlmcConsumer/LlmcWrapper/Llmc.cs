@@ -13,7 +13,8 @@ public class Llmc(LlmcConfiguration configuration)
         bool passthroughStdout, bool printLlmResult,
         string projectCwd, string projectJson,
         Func<string, string, string> funcLlm,
-        Func<string, string> funcEmbedding)
+        Func<string, string> funcEmbedding,
+        Func<string, string> funcGetFile)
     {
         StringBuilder arg = new();
 
@@ -126,6 +127,51 @@ public class Llmc(LlmcConfiguration configuration)
                         Console.WriteLine($"LlmcConsumer: Responded with embedding response.");
                         Console.ForegroundColor = color;
                     }
+
+                    Console.WriteLine($"LlmcConsumer: Responded with Embedding response.");
+
+                    outStream.Append(bufferOutStream.ToString());
+                    bufferOutStream.Clear();
+                }
+                else if (text.EndsWith("</readfile>"))
+                {
+                    string lineSeparator = Common.FindLineSeparator(text);
+                    string[] lines = text.Split(lineSeparator);
+
+                    // Find the index of the <readfile>.
+                    int readFileIndex = Array.IndexOf(lines, "<readfile>");
+                    string filepath = string.Empty;
+
+                    foreach (var line in lines[(readFileIndex + 1)..(lines.Length - 1)])
+                    {
+                        if (line.StartsWith("filepath:"))
+                        {
+                            filepath = line.Substring("filepath:".Length);
+                        }
+                    }
+
+                    string filecontent = funcGetFile(filepath);
+
+                    StringBuilder response = new();
+                    response.Append("<response>");
+                    response.Append(filecontent);
+                    response.Append("</response>");
+
+                    // Write the response to the input stream.
+                    process.StandardInput.Write(response.ToString());
+
+                    if (printLlmResult)
+                    {
+                        var color = Console.ForegroundColor;
+                        Console.ForegroundColor = ConsoleColor.Magenta;
+                        Console.WriteLine(
+                            $"LlmcConsumer: Responded with file response for {filepath}, " +
+                            $"some content: " +
+                            $"{filecontent.Substring(0, Math.Min(filecontent.Length, 10))}.");
+                        Console.ForegroundColor = color;
+                    }
+
+                    Console.WriteLine($"LlmcConsumer: Responded with file response for '{filepath}'.");
 
                     outStream.Append(bufferOutStream.ToString());
                     bufferOutStream.Clear();

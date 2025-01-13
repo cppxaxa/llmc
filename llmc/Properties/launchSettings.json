@@ -5,7 +5,7 @@
     },
     "llmc azure": {
       "commandName": "Project",
-      "commandLineArgs": "--azurellm --azureembedding --projectpath \"C:/B/L1/llmc/playground/project-presetsearch_real\""
+      "commandLineArgs": "--azurellm --azureembedding --projectpath \"C:/B/L1/llmc/playground/project-presetshortlist_real\""
     },
     "llmc gemini": {
       "commandName": "Project",

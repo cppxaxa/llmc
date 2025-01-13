@@ -1,0 +1,8 @@
+Features:
+- WriteFile(source="stdin",file="presetsvector-search/search-result.jsonl")
+Flags:
+- EnableInMemoryStorage
+PostBuild:
+- ConsoleWriteline(tag="presetspool",filename="presetsvector-search/search-result.jsonl")
+---
+Does not matter with WriteFile with source = stdin

@@ -252,6 +252,7 @@ while (promptIdx < prompts.Count)
 }
 
 /* TODO:
+ * [ ] A feature to upload a text file from stdin into inmemory.
  * [ ] TODO Bug: If we move a directory/ copy a directory, and given some files exists in
  * the memory, the extra existing files won't get deleted. Overwrite and create will work fine.
  * [ ] VectorizeVanilla should support updates to vector documents

@@ -31,6 +31,20 @@ var aoaiEmbeddingConfiguration = new Configuration(
 
 var llmConnector = new LlmConnector([aoaiLlmConfiguration, aoaiEmbeddingConfiguration]);
 
+string funcGetFile(string file)
+{
+    if (file == "presetsvector-search/search-result.jsonl")
+    {
+        return File.ReadAllText(Path.Combine(
+            AppDomain.CurrentDomain.BaseDirectory,
+            "Data/presetshortlist-search-result.jsonl"));
+    }
+    else
+    {
+        return $"No content available for {file}.";
+    }
+}
+
 string funcLlm(string system, string prompt)
 {
     return llmConnector.Complete(system, prompt);
@@ -64,8 +78,9 @@ string projectJson = JsonConvert.SerializeObject(new
 });
 
 string[] projectCwdList = [
-    "C:\\B\\L1\\llmc\\playground\\project-presetsearch_real",
-    "C:\\B\\L1\\llmc\\playground\\project-dimensionsearch_real",
+    //"C:\\B\\L1\\llmc\\playground\\project-presetsearch_real",
+    //"C:\\B\\L1\\llmc\\playground\\project-dimensionsearch_real",
+    "C:\\B\\L1\\llmc\\playground\\project-presetshortlist_real"
 ];
 
 ConsoleColor color;
@@ -80,7 +95,8 @@ foreach (var projectCwd in projectCwdList)
     var result = llmc.Execute(
         passthroughStdout: false, printLlmResult: false,
         projectCwd: projectCwd, projectJson: projectJson,
-        funcLlm: funcLlm, funcEmbedding: funcEmbedding);
+        funcLlm: funcLlm, funcEmbedding: funcEmbedding,
+        funcGetFile: funcGetFile);
 
     Console.WriteLine("LLMC output:");
 
