@@ -1,0 +1,8 @@
+Features:
+- WriteFile(source="stdin",file="dimensions-search/search-result.jsonl")
+Flags:
+- EnableInMemoryStorage
+PostBuild:
+- ConsoleWriteline(tag="dimensionssearchresult",filename="dimensions-search/search-result.jsonl")
+---
+Does not matter with WriteFile with source = stdin

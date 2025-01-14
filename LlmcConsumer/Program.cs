@@ -76,17 +76,17 @@ if (string.IsNullOrWhiteSpace(userQuery))
     Console.WriteLine("LlmcConsumer: Using default query: " + userQuery);
 }
 
-string projectJson = JsonConvert.SerializeObject(new
+var projectJsonModel = new
 {
     macros = new Dictionary<string, string>
     {
         ["{{{chartquery}}}"] = userQuery
     }
-});
+};
 
 string[] projectCwdList = [
-    //"C:\\B\\L1\\llmc\\playground\\project-presetvectorsearch_real",
-    //"C:\\B\\L1\\llmc\\playground\\project-presetshortlist_real",
+    "C:\\B\\L1\\llmc\\playground\\project-presetvectorsearch_real",
+    "C:\\B\\L1\\llmc\\playground\\project-presetshortlist_real",
     "C:\\B\\L1\\llmc\\playground\\project-dimensionvectorsearch_real",
     "C:\\B\\L1\\llmc\\playground\\project-dimensionllmsearch_real",
 ];
@@ -100,8 +100,10 @@ foreach (var projectCwd in projectCwdList)
     Console.WriteLine("LlmcConsumer: Running LLMC for project in " + projectCwd);
     Console.ForegroundColor = color;
 
+    string projectJson = JsonConvert.SerializeObject(projectJsonModel);
+
     var result = llmc.Execute(
-        passthroughStdout: false, printLlmResult: false,
+        passthroughStdout: true, printLlmResult: true,
         projectCwd: projectCwd, projectJson: projectJson,
         funcLlm: funcLlm, funcEmbedding: funcEmbedding,
         funcGetFile: funcGetFile);
@@ -126,6 +128,9 @@ foreach (var projectCwd in projectCwdList)
         Console.ForegroundColor = color;
         Console.WriteLine(result.ConsoleWriteline["user-prompt-without-presets"].RawContent);
         Console.WriteLine();
+
+        projectJsonModel.macros["{{{chartquery}}}"]
+            = result.ConsoleWriteline["user-prompt-without-presets"].GetBody();
     }
 
     if (result.ConsoleWriteline.ContainsKey("dimensions"))
