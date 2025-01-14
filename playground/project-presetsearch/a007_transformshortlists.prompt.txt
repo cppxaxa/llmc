@@ -1,9 +1,0 @@
-Features:
-- Transform(inputlinespath="search-results-test",wildcard="extracted.jsonl",outputappendfile="promptmodifier/keywords.csv")
-Flags:
-- EnableInMemoryStorage
-PreBuild:
-- DeleteFile(filename="promptmodifier/keywords.csv")
----
-var d = JsonConvert.DeserializeObject<JObject>(value);
-"- " + d["searchtext"].ToString()
