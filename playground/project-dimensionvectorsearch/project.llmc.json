@@ -1,0 +1,5 @@
+{
+    "macros": {
+        "{{{chartquery}}}": "Tell me ad clicks for China and US market from PCT and it should be campaign type Shopping ad"
+    }
+}

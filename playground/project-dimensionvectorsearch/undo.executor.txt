@@ -1,0 +1,10 @@
+
+
+MoveFile(from="C:/B/L1/llmc/playground/project-dimensionsearch_real\search-results-test/extracted.jsonl.bak-960651e0-dd16-4da4-9573-07dea42a794c",to="search-results-test/extracted.jsonl")
+DeleteFile(filename="C:/B/L1/llmc/playground/project-dimensionsearch_real\search-results-test/extracted.jsonl")
+DeleteFile(filename="dimensions-search/search-result.jsonl")
+MoveFile(from="dimensions-search/search-result.jsonl.d7d87a29-36a8-4757-a93c-cf44d162e11c.bak",to="dimensions-search/search-result.jsonl")
+
+DeleteFile(filename="dimensions-search/search-result.jsonl")
+MoveFile(from="dimensions-search/search-result.jsonl.a7047c84-2e41-4724-b514-08d65bafb5fe.bak",to="dimensions-search/search-result.jsonl")
+

@@ -2,5 +2,7 @@ Features:
 - HybridSearch(source="dimensionsvector",nresults="5",file="dimensions-search/search-result.jsonl",slidingwordsize="4",slidingwordoverlap="2",searchjsonkey="searchtext")
 Flags:
 - EnableInMemoryStorage
+PostBuild:
+- ConsoleWriteline(tag="dimensionssearchresult",filename="dimensions-search/search-result.jsonl")
 ---
 {{{chartquery}}}
