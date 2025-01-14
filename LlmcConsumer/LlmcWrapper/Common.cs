@@ -28,10 +28,10 @@ internal static class Common
         }
     }
 
-    internal static Dictionary<string, string> GetConsoleWritelines(string output)
+    internal static Dictionary<string, ConsoleWritelineModel> GetConsoleWritelines(string output)
     {
         string lineSeparator = Common.FindLineSeparator(output);
-        Dictionary<string, string> consoleWriteline = [];
+        Dictionary<string, ConsoleWritelineModel> consoleWriteline = [];
 
         string[] lines = output.Split(lineSeparator);
         int[] closingTag = lines.Select((e, i) => (e, i))
@@ -65,7 +65,7 @@ internal static class Common
                 n++;
             }
 
-            consoleWriteline.Add(tag, content);
+            consoleWriteline.Add(tag, new ConsoleWritelineModel(content));
         }
 
         return consoleWriteline;

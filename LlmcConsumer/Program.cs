@@ -31,13 +31,20 @@ var aoaiEmbeddingConfiguration = new Configuration(
 
 var llmConnector = new LlmConnector([aoaiLlmConfiguration, aoaiEmbeddingConfiguration]);
 
+Dictionary<string, string> fileContentMap = [];
+
+//// Sample file.
+//fileContentMap.Add(
+//    "presetsvector-search/search-result.jsonl",
+//    File.ReadAllText(Path.Combine(
+//        AppDomain.CurrentDomain.BaseDirectory,
+//        "Data/presetshortlist-search-result.jsonl")));
+
 string funcGetFile(string file)
 {
-    if (file == "presetsvector-search/search-result.jsonl")
+    if (fileContentMap.ContainsKey(file))
     {
-        return File.ReadAllText(Path.Combine(
-            AppDomain.CurrentDomain.BaseDirectory,
-            "Data/presetshortlist-search-result.jsonl"));
+        return fileContentMap[file];
     }
     else
     {
@@ -78,8 +85,7 @@ string projectJson = JsonConvert.SerializeObject(new
 });
 
 string[] projectCwdList = [
-    //"C:\\B\\L1\\llmc\\playground\\project-presetsearch_real",
-    //"C:\\B\\L1\\llmc\\playground\\project-dimensionsearch_real",
+    "C:\\B\\L1\\llmc\\playground\\project-presetvectorsearch_real",
     "C:\\B\\L1\\llmc\\playground\\project-presetshortlist_real"
 ];
 
@@ -106,7 +112,7 @@ foreach (var projectCwd in projectCwdList)
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("Shortlist presets:");
         Console.ForegroundColor = color;
-        Console.WriteLine(result.ConsoleWriteline["shortlistpresets"]);
+        Console.WriteLine(result.ConsoleWriteline["shortlistpresets"].RawContent);
         Console.WriteLine();
     }
 
@@ -116,7 +122,7 @@ foreach (var projectCwd in projectCwdList)
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("User prompt without presets:");
         Console.ForegroundColor = color;
-        Console.WriteLine(result.ConsoleWriteline["user-prompt-without-presets"]);
+        Console.WriteLine(result.ConsoleWriteline["user-prompt-without-presets"].RawContent);
         Console.WriteLine();
     }
 
@@ -126,19 +132,22 @@ foreach (var projectCwd in projectCwdList)
         Console.ForegroundColor = ConsoleColor.Cyan;
         Console.WriteLine("Dimensions:");
         Console.ForegroundColor = color;
-        Console.WriteLine(result.ConsoleWriteline["dimensions"]);
+        Console.WriteLine(result.ConsoleWriteline["dimensions"].RawContent);
         Console.WriteLine();
     }
 
-    //if (result.ConsoleWriteline.ContainsKey("presetspool"))
-    //{
-    //    color = Console.ForegroundColor;
-    //    Console.ForegroundColor = ConsoleColor.Green;
-    //    Console.WriteLine("Presets pool:");
-    //    Console.ForegroundColor = color;
-    //    Console.WriteLine(result.ConsoleWriteline["presetspool"]);
-    //    Console.WriteLine();
-    //}
+    if (result.ConsoleWriteline.ContainsKey("presetspool"))
+    {
+        color = Console.ForegroundColor;
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Presets pool:");
+        Console.ForegroundColor = color;
+        Console.WriteLine(result.ConsoleWriteline["presetspool"].RawContent);
+        Console.WriteLine();
+
+        fileContentMap["presetsvector-search/search-result.jsonl"]
+            = result.ConsoleWriteline["presetspool"].GetBody();
+    }
 
     //if (result.ConsoleWriteline.ContainsKey("dimensionssearchresult"))
     //{
