@@ -85,8 +85,10 @@ string projectJson = JsonConvert.SerializeObject(new
 });
 
 string[] projectCwdList = [
-    "C:\\B\\L1\\llmc\\playground\\project-presetvectorsearch_real",
-    "C:\\B\\L1\\llmc\\playground\\project-presetshortlist_real"
+    //"C:\\B\\L1\\llmc\\playground\\project-presetvectorsearch_real",
+    //"C:\\B\\L1\\llmc\\playground\\project-presetshortlist_real",
+    "C:\\B\\L1\\llmc\\playground\\project-dimensionvectorsearch_real",
+    "C:\\B\\L1\\llmc\\playground\\project-dimensionllmsearch_real",
 ];
 
 ConsoleColor color;
@@ -138,24 +140,27 @@ foreach (var projectCwd in projectCwdList)
 
     if (result.ConsoleWriteline.ContainsKey("presetspool"))
     {
-        color = Console.ForegroundColor;
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Presets pool:");
-        Console.ForegroundColor = color;
-        Console.WriteLine(result.ConsoleWriteline["presetspool"].RawContent);
-        Console.WriteLine();
+        //color = Console.ForegroundColor;
+        //Console.ForegroundColor = ConsoleColor.Green;
+        //Console.WriteLine("Presets pool:");
+        //Console.ForegroundColor = color;
+        //Console.WriteLine(result.ConsoleWriteline["presetspool"].RawContent);
+        //Console.WriteLine();
 
         fileContentMap["presetsvector-search/search-result.jsonl"]
             = result.ConsoleWriteline["presetspool"].GetBody();
     }
 
-    //if (result.ConsoleWriteline.ContainsKey("dimensionssearchresult"))
-    //{
-    //    color = Console.ForegroundColor;
-    //    Console.ForegroundColor = ConsoleColor.Cyan;
-    //    Console.WriteLine("Dimensions search result:");
-    //    Console.ForegroundColor = color;
-    //    Console.WriteLine(result.ConsoleWriteline["dimensionssearchresult"]);
-    //    Console.WriteLine();
-    //}
+    if (result.ConsoleWriteline.ContainsKey("dimensionssearchresult"))
+    {
+        //color = Console.ForegroundColor;
+        //Console.ForegroundColor = ConsoleColor.Cyan;
+        //Console.WriteLine("Dimensions search result:");
+        //Console.ForegroundColor = color;
+        //Console.WriteLine(result.ConsoleWriteline["dimensionssearchresult"]);
+        //Console.WriteLine();
+
+        fileContentMap["dimensions-search/search-result.jsonl"]
+            = result.ConsoleWriteline["dimensionssearchresult"].GetBody();
+    }
 }
