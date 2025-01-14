@@ -15,7 +15,7 @@ I want you to fix the TODO in README.md with minimal changes.
 The filtered json are shortlisted json lines from pool of json mentioned in README.md
 based on the following user query
 "{{{chartquery}}}"
-The "searchtext" property of each line in filtered json should match the keywords or meaning from user query.
+The "searchtext" and "value" and "root" property of each line in filtered json should match the group of keywords or meaning from user query.
 None of the filtered json is irrelevant compared to user query.
 The filtered json are exact subset of pool of json and remember to enclose with ```jsonl annotation.
 Give instructions to write README.md with new content.
